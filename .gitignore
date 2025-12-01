@@ -1,0 +1,65 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+out/
+.tmp/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files (do NOT commit secrets)
+.env
+.env.local
+.env.*.local
+.env.test
+.env.production
+prisma/.env
+
+# Logs
+logs/
+*.log
+.pids/
+*.pid
+
+# Coverage
+coverage/
+.nyc_output/
+coverage-final.json
+
+# Prisma
+prisma/migrations/
+prisma/dev.db
+prisma/*.sqlite
+# Prisma client is under node_modules; keep this in case of custom generation
+node_modules/.prisma/
+
+# Database files
+*.sqlite
+*.db
+
+# Docker
+docker-compose.override.yml
+.env.docker
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Misc
+*.local
+*.log.*
