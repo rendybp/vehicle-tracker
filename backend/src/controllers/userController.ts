@@ -1,37 +1,242 @@
-import { PrismaClient } from "@prisma/client";
+import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import type { Request, Response } from "express";
+import prisma from "../config/database";
 
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-
-export const register = async (req: Request, res: Response) => {
+// Get all users
+export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, role } = req.body;
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: { email, password: hashed, name, role },
+    const users = await prisma.user.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+        // Exclude password from response
+      },
     });
-    res.json(user);
-  } catch (err) {
-    res.status(400).json({ message: "Registration failed", error: err });
+    res.json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching users",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
-export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return res.status(404).json({ message: "User not found" });
+// Get user by ID
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+        // Exclude password from response
+      },
+    });
 
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) return res.status(401).json({ message: "Invalid password" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
-  const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
-  res.json({ token, user });
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 };
 
-export const getUsers = async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
+// Create new user
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const { email, name, password, role, is_active } = req.body;
+
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name: name || null,
+        password: hashedPassword,
+        role: role || "USER",
+        is_active: is_active !== undefined ? is_active : true,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+        // Exclude password from response
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error creating user",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Update user
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { email, name, password, role, is_active } = req.body;
+
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // If email is being updated, check if it's already taken
+    if (email && email !== existingUser.email) {
+      const emailTaken = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (emailTaken) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use",
+        });
+      }
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      ...(email && { email }),
+      ...(name !== undefined && { name }),
+      ...(role && { role }),
+      ...(is_active !== undefined && { is_active }),
+    };
+
+    // Hash password if provided
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    const user = await prisma.user.update({
+      where: { id: Number(id) },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+        // Exclude password from response
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating user",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Delete user
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await prisma.user.delete({
+      where: { id: Number(id) },
+    });
+
+    res.json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error deleting user",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 };

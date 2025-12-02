@@ -1,20 +1,27 @@
-import express from "express";
-import { register, login, getUsers } from "../controllers/userController";
+import { Router } from "express";
+import {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../controllers/userController";
 
-const router = express.Router();
+const router = Router();
 
-/**
- * @swagger
- * /api/users/register:
- *   post:
- *     summary: Register a new user
- * /api/users/login:
- *   post:
- *     summary: Login user
- */
+// GET /api/users - Get all users
+router.get("/", getAllUsers);
 
-router.post("/register", register);
-router.post("/login", login);
-router.get("/", getUsers); // contoh: list user untuk admin
+// GET /api/users/:id - Get user by ID
+router.get("/:id", getUserById);
+
+// POST /api/users - Create new user
+router.post("/", createUser);
+
+// PUT /api/users/:id - Update user
+router.put("/:id", updateUser);
+
+// DELETE /api/users/:id - Delete user
+router.delete("/:id", deleteUser);
 
 export default router;
