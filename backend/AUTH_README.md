@@ -75,7 +75,6 @@ Content-Type: application/json
   "email": "user@example.com",
   "password": "password123",
   "name": "John Doe",
-  "role": "USER"  // Optional: USER (default) or ADMIN
 }
 ```
 
