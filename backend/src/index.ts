@@ -62,12 +62,6 @@ const swaggerOptions = {
           bearerFormat: "JWT",
           description: "Enter your JWT token in the format: Bearer <token>",
         },
-        cookieAuth: {
-          type: "apiKey",
-          in: "cookie",
-          name: "refreshToken",
-          description: "HTTP-only cookie containing refresh token",
-        },
       },
     },
     security: [{ bearerAuth: [] }],

@@ -153,12 +153,6 @@ const router = Router();
  *       scheme: bearer
  *       bearerFormat: JWT
  *       description: Enter your JWT token in the format **Bearer &lt;token&gt;**
- *     
- *     cookieAuth:
- *       type: apiKey
- *       in: cookie
- *       name: refreshToken
- *       description: HTTP-only cookie containing refresh token
  */
 
 /**
@@ -261,8 +255,6 @@ router.post("/login", login);
  *     summary: Logout user
  *     description: Logout user by removing refresh token from database and clearing cookie
  *     tags: [Authentication]
- *     security:
- *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Logout successful
@@ -295,8 +287,6 @@ router.post("/logout", logout);
  *     summary: Refresh access token
  *     description: Generate a new access token using the refresh token from HTTP-only cookie
  *     tags: [Authentication]
- *     security:
- *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Access token refreshed successfully
