@@ -1,8 +1,13 @@
+// Import dependencies
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
+// Import route handlers
 import authRoutes from "./routes/authRoutes";
 import vehicleRoutes from "./routes/vehicleRoutes";
 import userRoutes from "./routes/userRoutes";
@@ -34,6 +39,25 @@ app.get("/", (req, res) => {
     version: "1.0.0",
   });
 });
+
+// Swagger setup
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Vehicle Tracker API",
+      version: "1.0.0",
+      description: "API documentation for the Vehicle Tracker application",
+    },
+    servers: [
+      { url: `http://localhost:${process.env.PORT || 5000}` },
+    ],
+  },
+  apis: ["./src/routes/*.ts"], // Path to the API docs
+};
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 404 handler
 app.use((req, res) => {
