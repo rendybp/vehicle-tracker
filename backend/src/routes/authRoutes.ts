@@ -160,7 +160,7 @@ const router = Router();
  * /api/auth/register:
  *   post:
  *     summary: Register a new user
- *     description: Create a new user account with email and password.  Returns access token and sets refresh token as HTTP-only cookie.
+ *     description: Create a new user account with email and password. Returns access token and sets refresh token as HTTP-only cookie.
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
