@@ -93,14 +93,14 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 // Swagger UI options
 const swaggerUiOptions = {
-  explorer: true,
+  // explorer: true,
   customCss: '.swagger-ui . topbar { display: none }',
   customSiteTitle: "Vehicle Tracker API Documentation",
   swaggerOptions: {
     persistAuthorization: true, // Persist authorization data
     displayRequestDuration: true,
     docExpansion: "none", // Collapse all endpoints by default
-    filter: true, // Enable search/filter
+    // filter: true, // Enable search/filter
     showExtensions: true,
     showCommonExtensions: true,
   },
