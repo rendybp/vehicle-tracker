@@ -36,7 +36,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
       });
     }
 
-    const decoded = jwt.verify(token, accessTokenSecret) as unknown as jwt.JwtPayload & {
+    const decoded = jwt.verify(token!, accessTokenSecret) as unknown as jwt.JwtPayload & {
       id: number;
       email: string;
       role: string;
