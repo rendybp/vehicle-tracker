@@ -188,7 +188,7 @@ router.use(verifyToken);
  * /api/vehicles:
  *   get:
  *     summary: Get all vehicles
- *     description: Retrieve a list of all vehicles.  Accessible by both USER and ADMIN roles.
+ *     description: Retrieve a list of all vehicles. Accessible by both USER and ADMIN roles.
  *     tags: [Vehicles]
  *     security:
  *       - bearerAuth: []
