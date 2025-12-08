@@ -147,12 +147,6 @@ const router = Router();
  *           type: string
  *           example: Detailed error information
  *   
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- *       description: Enter your JWT token in the format **Bearer &lt;token&gt;**
  */
 
 /**
