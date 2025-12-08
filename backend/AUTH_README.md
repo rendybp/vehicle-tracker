@@ -341,7 +341,7 @@ Authorization: Bearer <access_token>
 # Register
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@test.com","password":"admin123","name":"Admin User","role":"ADMIN"}' \
+  -d '{"email":"admin@test.com","password":"admin123","name":"Admin User"}' \
   -c cookies.txt
 
 # Login
