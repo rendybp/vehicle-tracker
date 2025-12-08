@@ -44,10 +44,12 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    if (password.length < 8) {
+    // Password policy: Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
+    const passwordPolicyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!passwordPolicyRegex.test(password)) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 8 characters",
+        message: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
       });
     }
 
