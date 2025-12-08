@@ -180,7 +180,7 @@ const router = Router();
  *             description: HTTP-only cookie containing refresh token
  *             schema:
  *               type: string
- *               example: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.. .; HttpOnly; Secure; SameSite=Strict
+ *               example: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict
  *       400:
  *         description: Bad request - Missing required fields or user already exists
  *         content:
