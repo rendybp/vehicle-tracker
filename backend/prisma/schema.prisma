@@ -36,6 +36,7 @@ model User {
   password  String
   role      UserRole @default(USER)
   is_active  Boolean  @default(true)
+  refresh_token String?
   updated_at DateTime @default(now()) @updatedAt
   created_at DateTime @default(now())
 
