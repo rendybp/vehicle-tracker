@@ -122,7 +122,7 @@ const router = Router();
  *           properties:
  *             accessToken:
  *               type: string
- *               example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... 
+ *               example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     
  *     SuccessResponse:
  *       type: object
