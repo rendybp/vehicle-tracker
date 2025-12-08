@@ -269,7 +269,7 @@ router.post("/", createUser);
  * /api/users/{id}:
  *   put:
  *     summary: Update user
- *     description: Update an existing user's information.  Only accessible by ADMIN role. 
+ *     description: Update an existing user's information. Only accessible by ADMIN role. 
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
