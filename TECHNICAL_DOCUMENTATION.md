@@ -4,12 +4,12 @@
 
 **Project Name:** Vehicle Tracker  
 **Repository:** rendybp/vehicle-tracker  
-**Tech Stack:** React + Vite + TypeScript (SWC) + Node.js Backend  
-**Current Date:** 2025-12-10  
-**Status:** Backend Complete, Frontend In Progress
+**Tech Stack:** React + Vite + TypeScript + SWC  
+**Current Phase:** Frontend Development  
+**Backend Status:** ✅ Completed  
 
-### Purpose
-A comprehensive vehicle tracking and management system with role-based access control, real-time vehicle monitoring, and secure authentication.
+### Description
+A comprehensive vehicle tracking and management system with role-based access control, real-time vehicle monitoring, and secure authentication. The application features a modern, responsive frontend built with React and integrates with a completed backend API. 
 
 ---
 
@@ -60,10 +60,9 @@ A comprehensive vehicle tracking and management system with role-based access co
 │  │  - HTTP-only Cookies (Refresh Token Storage)          │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  Database (PostgreSQL/MySQL/MongoDB)                   │ │
+│  │  Database (PostgreSQL Using Prisma )                   │ │
 │  │  - Users Table                                         │ │
 │  │  - Vehicles Table                                      │ │
-│  │  - Vehicle Tracking Data                               │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -87,11 +86,15 @@ A comprehensive vehicle tracking and management system with role-based access co
 
 #### Backend
 - **Runtime:** Node.js
-- **Framework:** Express.js
+- **Framework:** Express.js + TypeScript
+- **Database ORM:** Prisma
+- **Database:** PostgreSQL
 - **Authentication:** JWT (jsonwebtoken)
-- **Password Hashing:** bcryptjs
-- **Security:** CORS, Helmet
-- **Database:** PostgreSQL/MySQL/MongoDB (TBD)
+- **Password Hashing:** bcryptjs (10 rounds)
+- **Security:** CORS, Helmet, cookie-parser
+- **Documentation:** Swagger UI (OpenAPI 3.0)
+- **Token Storage:** HTTP-only cookies (refresh token)
+- **API Structure:** RESTful with modular routing
 
 ---
 
@@ -146,6 +149,7 @@ A comprehensive vehicle tracking and management system with role-based access co
 ##### USER Role
 - ✅ View all vehicles (GET /api/vehicles)
 - ✅ View vehicle details (GET /api/vehicles/:id)
+- ✅ View on his own profile (GET /api/auth/me)
 - ❌ Create vehicles (POST /api/vehicles)
 - ❌ Update vehicles (PUT /api/vehicles/:id)
 - ❌ Delete vehicles (DELETE /api/vehicles/:id)
@@ -162,38 +166,48 @@ A comprehensive vehicle tracking and management system with role-based access co
 ##### Access Token
 ```typescript
 interface AccessTokenPayload {
-  id: string;
+  id: number;                    // Integer user ID
   email: string;
   role: 'USER' | 'ADMIN';
+  iat: number;                   // Issued at timestamp
+  exp: number;                   // Expiration timestamp
 }
 
 // Configuration
 {
-  lifetime: '15m',
+  lifetime: '15m',               // 15 minutes
   storage: 'client-side (memory/localStorage)',
   usage: 'Authorization: Bearer <token>',
-  refresh: 'automatic via refresh token'
+  algorithm: 'HS256',            // HMAC SHA256
+  secret: 'ACCESS_TOKEN_SECRET', // From environment variable
+  refresh: 'automatic via /api/auth/refresh endpoint'
 }
 ```
 
 ##### Refresh Token
 ```typescript
 interface RefreshTokenPayload {
-  id: string;
+  id: number;                    // Integer user ID
   email: string;
   role: 'USER' | 'ADMIN';
+  iat: number;                   // Issued at timestamp
+  exp: number;                   // Expiration timestamp
 }
 
 // Configuration
 {
-  lifetime: '7d',
+  lifetime: '7d',                // 7 days
   storage: 'HTTP-only cookie',
   usage: 'automatic with /api/auth/refresh',
+  name: 'refreshToken',
+  algorithm: 'HS256',            // HMAC SHA256
+  secret: 'REFRESH_TOKEN_SECRET', // From environment variable
   database: 'users.refresh_token column',
   security: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    sameSite: 'strict',
+    maxAge: 604800000            // 7 days in milliseconds
   }
 }
 ```
@@ -660,6 +674,41 @@ const ProtectedRoute = ({
 
 ## API Endpoints
 
+### Base URL
+```
+Development: http://localhost:5000
+Production: https://your-domain.com
+```
+
+### Quick Reference
+
+#### Authentication
+| Method | Endpoint | Auth Required | Role | Description |
+|--------|----------|---------------|------|-------------|
+| POST | `/api/auth/register` | No | - | Register new user |
+| POST | `/api/auth/login` | No | - | Login user |
+| POST | `/api/auth/logout` | No | - | Logout user |
+| POST | `/api/auth/refresh` | Cookie | - | Refresh access token |
+| GET | `/api/auth/me` | Yes | USER, ADMIN | Get current user |
+
+#### Vehicles
+| Method | Endpoint | Auth Required | Role | Description |
+|--------|----------|---------------|------|-------------|
+| GET | `/api/vehicles` | Yes | USER, ADMIN | Get all vehicles |
+| GET | `/api/vehicles/:id` | Yes | USER, ADMIN | Get vehicle by ID |
+| POST | `/api/vehicles` | Yes | ADMIN | Create vehicle |
+| PUT | `/api/vehicles/:id` | Yes | ADMIN | Update vehicle |
+| DELETE | `/api/vehicles/:id` | Yes | ADMIN | Delete vehicle |
+
+#### Users
+| Method | Endpoint | Auth Required | Role | Description |
+|--------|----------|---------------|------|-------------|
+| GET | `/api/users` | Yes | ADMIN | Get all users |
+| GET | `/api/users/:id` | Yes | ADMIN | Get user by ID |
+| POST | `/api/users` | Yes | ADMIN | Create user |
+| PUT | `/api/users/:id` | Yes | ADMIN | Update user |
+| DELETE | `/api/users/:id` | Yes | ADMIN | Delete user |
+
 ### Authentication Endpoints
 
 #### Register User
@@ -670,27 +719,38 @@ Content-Type: application/json
 Request Body:
 {
   "email": "user@example.com",
-  "password": "SecurePass123!",
-  "name": "John Doe"
+  "password": "password123",       // Minimum 6 characters
+  "name": "John Doe",              // Optional
+  "role": "USER"                   // Optional, default: USER (can be ADMIN)
 }
 
 Response (201):
 {
   "success": true,
+  "message": "User registered successfully",
   "data": {
     "user": {
-      "id": "uuid",
+      "id": 1,                     // Integer, auto-increment
       "email": "user@example.com",
       "name": "John Doe",
-      "role": "USER",
-      "createdAt": "2025-12-10T10:00:00Z"
+      "role": "USER"               // USER or ADMIN
     },
     "accessToken": "eyJhbGciOiJIUzI1NiIs..."
   }
 }
 
 Cookies Set:
-- refreshToken (HTTP-only, 7 days)
+- refreshToken (HTTP-only, Secure in production, SameSite=strict, 7 days)
+
+Validation:
+- Email must be unique
+- Password must be at least 6 characters
+- Email format must be valid
+
+Notes:
+- User is automatically logged in after registration
+- Refresh token is stored in database and sent as HTTP-only cookie
+- Password is hashed with bcryptjs (10 rounds)
 ```
 
 #### Login User
@@ -701,15 +761,16 @@ Content-Type: application/json
 Request Body:
 {
   "email": "user@example.com",
-  "password": "SecurePass123!"
+  "password": "password123"
 }
 
 Response (200):
 {
   "success": true,
+  "message": "Login successful",
   "data": {
     "user": {
-      "id": "uuid",
+      "id": 1,                   // Integer
       "email": "user@example.com",
       "name": "John Doe",
       "role": "USER"
@@ -719,7 +780,17 @@ Response (200):
 }
 
 Cookies Set:
-- refreshToken (HTTP-only, 7 days)
+- refreshToken (HTTP-only, Secure in production, SameSite=strict, 7 days)
+
+Error Responses:
+- 400: Missing email or password
+- 401: Invalid email or password
+- 403: Account is deactivated
+
+Validation:
+- Email and password are required
+- Account must be active (is_active = true)
+- Password is verified using bcrypt.compare()
 ```
 
 #### Refresh Token
@@ -730,29 +801,44 @@ Cookie: refreshToken=<token>
 Response (200):
 {
   "success": true,
+  "message": "Access token refreshed",
   "data": {
     "accessToken": "eyJhbGciOiJIUzI1NiIs..."
   }
 }
 
-Cookies Updated:
-- refreshToken (HTTP-only, 7 days)
+Error Responses:
+- 401: Refresh token is required / Refresh token expired
+- 403: Invalid refresh token / Account is deactivated
+
+Notes:
+- Refresh token is read from HTTP-only cookie
+- Token is verified against REFRESH_TOKEN_SECRET
+- Token in database must match the provided token
+- User account must be active (is_active = true)
+- Does NOT rotate refresh token (refresh token remains the same)
 ```
 
 #### Logout
 ```
 POST /api/auth/logout
 Cookie: refreshToken=<token>
-Authorization: Bearer <access-token>
 
 Response (200):
 {
   "success": true,
-  "message": "Logged out successfully"
+  "message": "Logout successful"
 }
 
 Cookies Cleared:
 - refreshToken
+
+Notes:
+- Refresh token is removed from database (users.refresh_token set to null)
+- HTTP-only cookie is cleared
+- No authentication required (can logout even with expired token)
+- Returns success even if no refresh token is provided
+```
 ```
 
 #### Get Current User
@@ -778,48 +864,40 @@ Response (200):
 
 ### Vehicle Endpoints
 
+**Authentication Required:** All vehicle endpoints require a valid access token in the Authorization header.
+
+**Authorization:**
+- GET endpoints: USER and ADMIN
+- POST, PUT, DELETE endpoints: ADMIN only
+
 #### Get All Vehicles
 ```
 GET /api/vehicles
 Authorization: Bearer <access-token>
-Query Parameters:
-- page (optional): page number
-- limit (optional): items per page
-- search (optional): search term
-- status (optional): active|idle|maintenance
 
 Response (200):
 {
   "success": true,
-  "data": {
-    "vehicles": [
-      {
-        "id": "uuid",
-        "name": "Vehicle 001",
-        "make": "Toyota",
-        "model": "Camry",
-        "year": 2023,
-        "vin": "1HGBH41JXMN109186",
-        "licensePlate": "ABC-1234",
-        "status": "active",
-        "location": {
-          "lat": 40.7128,
-          "lng": -74.0060,
-          "address": "New York, NY"
-        },
-        "lastUpdated": "2025-12-10T10:00:00Z"
-      }
-    ],
-    "pagination": {
-      "total": 100,
-      "page": 1,
-      "limit": 10,
-      "totalPages": 10
+  "data": [
+    {
+      "id": 1,                      // Integer
+      "name": "Toyota Avanza",
+      "status": "ACTIVE",           // ACTIVE, INACTIVE, MAINTENANCE
+      "fuel_level": 75.5,           // Float (0-100)
+      "odometer": 15000,            // Float (kilometers)
+      "latitude": -6.2088,          // Float (GPS coordinate)
+      "longitude": 106.8456,        // Float (GPS coordinate)
+      "speed": 60,                  // Float (km/h)
+      "updated_at": "2025-12-10T10:00:00Z",
+      "created_at": "2025-12-03T08:00:00Z"
     }
-  }
+  ]
 }
 
 Accessible by: USER, ADMIN
+Notes:
+- Returns all vehicles in descending order by created_at
+- No pagination implemented (returns all vehicles)
 ```
 
 #### Get Vehicle by ID
@@ -831,22 +909,23 @@ Response (200):
 {
   "success": true,
   "data": {
-    "vehicle": {
-      "id": "uuid",
-      "name": "Vehicle 001",
-      "make": "Toyota",
-      "model": "Camry",
-      "year": 2023,
-      "vin": "1HGBH41JXMN109186",
-      "licensePlate": "ABC-1234",
-      "status": "active",
-      "location": {
-        "lat": 40.7128,
-        "lng": -74.0060,
-        "address": "New York, NY"
-      },
-      "routeHistory": [
-        {
+    "id": 1,
+    "name": "Toyota Avanza",
+    "status": "ACTIVE",
+    "fuel_level": 75.5,
+    "odometer": 15000,
+    "latitude": -6.2088,
+    "longitude": 106.8456,
+    "speed": 60,
+    "updated_at": "2025-12-10T10:00:00Z",
+    "created_at": "2025-12-03T08:00:00Z"
+  }
+}
+
+Error Responses:
+- 404: Vehicle not found
+
+Accessible by: USER, ADMIN
           "lat": 40.7128,
           "lng": -74.0060,
           "timestamp": "2025-12-10T09:00:00Z"
@@ -869,32 +948,41 @@ Content-Type: application/json
 
 Request Body:
 {
-  "name": "Vehicle 001",
-  "make": "Toyota",
-  "model": "Camry",
-  "year": 2023,
-  "vin": "1HGBH41JXMN109186",
-  "licensePlate": "ABC-1234",
-  "status": "active",
-  "location": {
-    "lat": 40.7128,
-    "lng": -74.0060
-  }
+  "name": "Toyota Avanza",           // Required
+  "fuel_level": 75.5,                // Required (0-100)
+  "odometer": 15000,                 // Required (km)
+  "latitude": -6.2088,               // Required
+  "longitude": 106.8456,             // Required
+  "speed": 60,                       // Required (km/h)
+  "status": "ACTIVE"                 // Optional, default: ACTIVE
 }
 
 Response (201):
 {
   "success": true,
+  "message": "Vehicle created successfully",
   "data": {
-    "vehicle": {
-      "id": "uuid",
-      "name": "Vehicle 001",
-      ...
-    }
+    "id": 1,
+    "name": "Toyota Avanza",
+    "status": "ACTIVE",
+    "fuel_level": 75.5,
+    "odometer": 15000,
+    "latitude": -6.2088,
+    "longitude": 106.8456,
+    "speed": 60,
+    "updated_at": "2025-12-10T10:00:00Z",
+    "created_at": "2025-12-10T10:00:00Z"
   }
 }
 
+Error Responses:
+- 400: Missing required fields
+- 403: Insufficient permissions (USER role)
+
 Accessible by: ADMIN only
+Validation:
+- All numeric fields (fuel_level, odometer, latitude, longitude, speed) are required
+- Status must be: ACTIVE, INACTIVE, or MAINTENANCE
 ```
 
 #### Update Vehicle
@@ -903,29 +991,43 @@ PUT /api/vehicles/:id
 Authorization: Bearer <access-token>
 Content-Type: application/json
 
-Request Body:
+Request Body (all fields optional):
 {
-  "name": "Vehicle 001 Updated",
-  "status": "maintenance",
-  "location": {
-    "lat": 40.7589,
-    "lng": -73.9851
-  }
+  "name": "Toyota Avanza Updated",
+  "fuel_level": 80.0,
+  "odometer": 15500,
+  "latitude": -6.2100,
+  "longitude": 106.8500,
+  "speed": 65,
+  "status": "MAINTENANCE"
 }
 
 Response (200):
 {
   "success": true,
+  "message": "Vehicle updated successfully",
   "data": {
-    "vehicle": {
-      "id": "uuid",
-      "name": "Vehicle 001 Updated",
-      ...
-    }
+    "id": 1,
+    "name": "Toyota Avanza Updated",
+    "status": "MAINTENANCE",
+    "fuel_level": 80.0,
+    "odometer": 15500,
+    "latitude": -6.2100,
+    "longitude": 106.8500,
+    "speed": 65,
+    "updated_at": "2025-12-10T11:00:00Z",
+    "created_at": "2025-12-10T10:00:00Z"
   }
 }
 
+Error Responses:
+- 404: Vehicle not found
+- 403: Insufficient permissions (USER role)
+
 Accessible by: ADMIN only
+Notes:
+- Only provided fields are updated
+- updated_at timestamp is automatically updated
 ```
 
 #### Delete Vehicle
@@ -939,12 +1041,23 @@ Response (200):
   "message": "Vehicle deleted successfully"
 }
 
+Error Responses:
+- 404: Vehicle not found
+- 403: Insufficient permissions (USER role)
+
 Accessible by: ADMIN only
+Notes:
+- Hard delete (vehicle is permanently removed from database)
+- No soft delete implemented
 ```
 
 ---
 
 ### User Management Endpoints (Admin Only)
+
+**Authentication Required:** All user endpoints require ADMIN role.
+
+**Authorization:** ADMIN only (verified by checkRole middleware)
 
 #### Get All Users
 ```
@@ -954,111 +1067,430 @@ Authorization: Bearer <access-token>
 Response (200):
 {
   "success": true,
-  "data": {
-    "users": [
-      {
-        "id": "uuid",
-        "email": "user@example.com",
-        "name": "John Doe",
-        "role": "USER",
-        "active": true,
-        "createdAt": "2025-12-10T10:00:00Z"
-      }
-    ]
-  }
+  "data": [
+    {
+      "id": 1,                        // Integer
+      "email": "user@example.com",
+      "name": "John Doe",
+      "role": "USER",                 // USER or ADMIN
+      "is_active": true,
+      "created_at": "2025-12-10T10:00:00Z",
+      "updated_at": "2025-12-10T10:00:00Z"
+    }
+  ]
 }
+
+Notes:
+- Password field is excluded from response
+- Returns users in descending order by created_at
+- No pagination implemented
 
 Accessible by: ADMIN only
 ```
 
-#### Update User Role
+#### Get User by ID
 ```
-PATCH /api/users/:id/role
+GET /api/users/:id
 Authorization: Bearer <access-token>
-Content-Type: application/json
-
-Request Body:
-{
-  "role": "ADMIN"
-}
 
 Response (200):
 {
   "success": true,
   "data": {
-    "user": {
-      "id": "uuid",
-      "role": "ADMIN"
-    }
+    \"id\": 1,
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "USER",
+    "is_active": true,
+    "created_at": "2025-12-10T10:00:00Z",
+    "updated_at": "2025-12-10T10:00:00Z"
   }
 }
 
+Error Responses:
+- 404: User not found
+- 403: Insufficient permissions (USER role)
+
 Accessible by: ADMIN only
+```
+
+#### Create User
+```
+POST /api/users
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+Request Body:
+{
+  "email": "newuser@example.com",     // Required, must be unique
+  "password": "password123",          // Required, min 6 characters
+  "name": "Jane Doe",                 // Optional
+  "role": "USER",                     // Optional, default: USER
+  "is_active": true                   // Optional, default: true
+}
+
+Response (201):
+{
+  "success": true,
+  "message": "User created successfully",
+  "data": {
+    "id": 2,
+    "email": "newuser@example.com",
+    "name": "Jane Doe",
+    "role": "USER",
+    "is_active": true,
+    "created_at": "2025-12-10T11:00:00Z",
+    "updated_at": "2025-12-10T11:00:00Z"
+  }
+}
+
+Error Responses:
+- 400: Email and password are required / Email already exists
+- 403: Insufficient permissions (USER role)
+
+Accessible by: ADMIN only
+Notes:
+- Password is hashed with bcryptjs (10 rounds)
+- Email must be unique
+```
+
+#### Update User
+```
+PUT /api/users/:id
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+Request Body (all fields optional):
+{
+  "email": "updated@example.com",
+  "name": "John Updated",
+  "password": "newpassword123",
+  "role": "ADMIN",
+  "is_active": false
+}
+
+Response (200):
+{
+  "success": true,
+  "message": "User updated successfully",
+  "data": {
+    "id": 1,
+    "email": "updated@example.com",
+    "name": "John Updated",
+    "role": "ADMIN",
+    "is_active": false,
+    "created_at": "2025-12-10T10:00:00Z",
+    "updated_at": "2025-12-10T12:00:00Z"
+  }
+}
+
+Error Responses:
+- 404: User not found
+- 400: Email already in use (if email is being changed)
+- 403: Insufficient permissions (USER role)
+
+Accessible by: ADMIN only
+Notes:
+- Only provided fields are updated
+- If password is provided, it will be hashed
+- Email uniqueness is checked if being updated
+- updated_at is automatically updated
+```
+
+#### Delete User
+```
+DELETE /api/users/:id
+Authorization: Bearer <access-token>
+
+Response (200):
+{
+  "success": true,
+  "message": "User deleted successfully"
+}
+
+Error Responses:
+- 404: User not found
+- 403: Insufficient permissions (USER role)
+
+Accessible by: ADMIN only
+Notes:
+- Hard delete (user is permanently removed)
+- No soft delete implemented
+```
+
+#### Get Current User (Me)
+```
+GET /api/auth/me
+Authorization: Bearer <access-token>
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "USER",
+    "is_active": true,
+    "created_at": "2025-12-10T10:00:00Z",
+    "updated_at": "2025-12-10T10:00:00Z"
+  }
+}
+
+Accessible by: USER, ADMIN
+Notes:
+- Returns currently authenticated user's information
+- Password is excluded from response
 ```
 
 ---
 
 ## Database Schema
 
-### Users Table
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  role VARCHAR(20) DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
-  active BOOLEAN DEFAULT true,
-  refresh_token TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+### Technology
+- **ORM:** Prisma
+- **Database:** PostgreSQL
+- **Migration Tool:** Prisma Migrate
+- **Schema Location:** `backend/prisma/schema.prisma`
 
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
+### Tables
+
+#### Users Table (`users`)
+```prisma
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  name          String?
+  password      String
+  role          UserRole @default(USER)
+  is_active     Boolean  @default(true)
+  refresh_token String?  // Stores current refresh token
+  updated_at    DateTime @default(now()) @updatedAt
+  created_at    DateTime @default(now())
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
 ```
 
-### Vehicles Table
-```sql
-CREATE TABLE vehicles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(255) NOT NULL,
-  make VARCHAR(100) NOT NULL,
-  model VARCHAR(100) NOT NULL,
-  year INTEGER NOT NULL,
-  vin VARCHAR(17) UNIQUE NOT NULL,
-  license_plate VARCHAR(20) UNIQUE NOT NULL,
-  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'idle', 'maintenance')),
-  location_lat DECIMAL(10, 8),
-  location_lng DECIMAL(11, 8),
-  location_address TEXT,
-  image_url TEXT,
-  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  created_by UUID REFERENCES users(id)
-);
+**Fields:**
+- `id`: Auto-incrementing integer primary key
+- `email`: Unique email address (used for login)
+- `name`: Optional user full name
+- `password`: bcrypt hashed password (10 rounds)
+- `role`: USER or ADMIN (default: USER)
+- `is_active`: Account status (default: true)
+- `refresh_token`: Current JWT refresh token (nullable)
+- `updated_at`: Auto-updated timestamp
+- `created_at`: Record creation timestamp
 
-CREATE INDEX idx_vehicles_status ON vehicles(status);
-CREATE INDEX idx_vehicles_vin ON vehicles(vin);
-CREATE INDEX idx_vehicles_license_plate ON vehicles(license_plate);
+**Indexes:**
+- Primary key on `id`
+- Unique index on `email`
+
+---
+
+#### Vehicles Table (`vehicles`)
+```prisma
+model Vehicle {
+  id          Int           @id @default(autoincrement())
+  name        String
+  status      VehicleStatus @default(ACTIVE)
+  fuel_level  Float
+  odometer    Float
+  latitude    Float
+  longitude   Float
+  speed       Float
+  updated_at  DateTime      @default(now()) @updatedAt
+  created_at  DateTime      @default(now())
+
+  @@map("vehicles")
+}
+
+enum VehicleStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
 ```
 
-### Vehicle Tracking History Table
-```sql
-CREATE TABLE vehicle_tracking (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
-  lat DECIMAL(10, 8) NOT NULL,
-  lng DECIMAL(11, 8) NOT NULL,
-  speed DECIMAL(5, 2),
-  heading INTEGER,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+**Fields:**
+- `id`: Auto-incrementing integer primary key
+- `name`: Vehicle name/identifier
+- `status`: ACTIVE, INACTIVE, or MAINTENANCE (default: ACTIVE)
+- `fuel_level`: Current fuel percentage (0-100)
+- `odometer`: Odometer reading in kilometers
+- `latitude`: GPS latitude coordinate
+- `longitude`: GPS longitude coordinate
+- `speed`: Current speed in km/h
+- `updated_at`: Auto-updated timestamp
+- `created_at`: Record creation timestamp
 
-CREATE INDEX idx_tracking_vehicle_id ON vehicle_tracking(vehicle_id);
-CREATE INDEX idx_tracking_timestamp ON vehicle_tracking(timestamp);
+**Indexes:**
+- Primary key on `id`
+
+---
+
+### Database Commands
+
+```bash
+# Generate Prisma Client
+npm run db:generate
+
+# Push schema changes to database
+npm run db:push
+
+# Open Prisma Studio (GUI)
+npm run db:studio
+
+# Create and apply migration
+npx prisma migrate dev --name migration_name
+
+# Apply migrations in production
+npx prisma migrate deploy
+
+# Reset database (development only)
+npx prisma migrate reset
 ```
+
+---
+
+## API Documentation
+
+### Swagger/OpenAPI Documentation
+
+The backend includes interactive API documentation using Swagger UI.
+
+**Access:** `http://localhost:5000/api-docs`
+
+**Features:**
+- Interactive API testing
+- Request/response examples
+- Schema definitions
+- Authentication support (JWT Bearer token)
+- Organized by tags (Authentication, Vehicles, Users)
+
+**Usage:**
+1. Start the backend server: `npm run dev`
+2. Navigate to `http://localhost:5000/api-docs`
+3. Click "Authorize" and enter your JWT token
+4. Test endpoints directly from the browser
+
+### Common Error Responses
+
+All error responses follow this format:
+
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "error": "Detailed error message (optional)"
+}
+```
+
+#### HTTP Status Codes
+
+**200 OK:** Request succeeded
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": { ... }
+}
+```
+
+**201 Created:** Resource created successfully
+```json
+{
+  "success": true,
+  "message": "Resource created successfully",
+  "data": { ... }
+}
+```
+
+**400 Bad Request:** Invalid input or validation error
+```json
+{
+  "success": false,
+  "message": "Email and password are required"
+}
+```
+
+**401 Unauthorized:** Missing or invalid authentication token
+```json
+{
+  "success": false,
+  "message": "Access token expired"
+}
+```
+
+**403 Forbidden:** Insufficient permissions
+```json
+{
+  "success": false,
+  "message": "Insufficient permissions"
+}
+```
+
+**404 Not Found:** Resource not found
+```json
+{
+  "success": false,
+  "message": "User not found"
+}
+```
+
+**500 Internal Server Error:** Server error
+```json
+{
+  "success": false,
+  "message": "Error fetching users",
+  "error": "Database connection failed"
+}
+```
+
+---
+
+## Environment Variables
+
+### Backend (.env)
+
+```bash
+# Database Configuration
+DATABASE_URL="postgresql://username:password@localhost:5432/vehicle_tracker"
+
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+
+# Client URL (for CORS)
+CLIENT_URL=http://localhost:3000
+
+# JWT Secrets (Generate secure random strings for production)
+# Generate using: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+ACCESS_TOKEN_SECRET=your_access_token_secret_here
+REFRESH_TOKEN_SECRET=your_refresh_token_secret_here
+```
+
+**Required Environment Variables:**
+- `DATABASE_URL`: PostgreSQL connection string
+- `ACCESS_TOKEN_SECRET`: Secret key for signing access tokens
+- `REFRESH_TOKEN_SECRET`: Secret key for signing refresh tokens
+
+**Optional Environment Variables:**
+- `PORT`: Server port (default: 5000)
+- `NODE_ENV`: Environment mode (development/production)
+- `CLIENT_URL`: Frontend URL for CORS (default: http://localhost:3000)
+
+**Security Notes:**
+- Never commit `.env` file to version control
+- Use strong, unique secrets for JWT tokens (64+ characters)
+- Different secrets for ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET
+- In production, use environment variables from hosting provider
 
 ---
 
@@ -1068,7 +1500,7 @@ CREATE INDEX idx_tracking_timestamp ON vehicle_tracking(timestamp);
 
 1. **Token Storage**
    - Access token: Store in Zustand (memory) + localStorage backup
-   - Never store refresh token in localStorage
+   - Never store refresh token in localStorage (HTTP-only cookie only)
    - Clear tokens on logout
 
 2. **XSS Prevention**
@@ -1364,27 +1796,83 @@ xl: 1280px  /* Large desktop */
 
 ## Development Guidelines
 
+### Backend Setup & Verification
+
+#### Initial Setup
+```bash
+# 1. Navigate to backend directory
+cd backend
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables
+cp .env.example .env
+# Edit .env with your database credentials and JWT secrets
+
+# 4. Generate Prisma Client
+npm run db:generate
+
+# 5. Push database schema
+npm run db:push
+
+# 6. Start development server
+npm run dev
+```
+
+#### Verify Backend is Running
+
+**Health Check:**
+```bash
+curl http://localhost:5000/
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "message": "Vehicle Tracker API is running",
+  "version": "1.0.0",
+  "documentation": "http://localhost:5000/api-docs"
+}
+```
+
+**Test API Documentation:**
+- Navigate to `http://localhost:5000/api-docs`
+- Should see Swagger UI with all endpoints documented
+
+#### Available Scripts
+
+```bash
+npm run dev          # Start development server with nodemon
+npm run build        # Compile TypeScript to JavaScript
+npm run start        # Start production server
+npm run db:generate  # Generate Prisma Client
+npm run db:push      # Push schema to database
+npm run db:studio    # Open Prisma Studio GUI
+```
+
 ### Code Style
 
-#### TypeScript
+#### TypeScript (Backend & Frontend)
 ```typescript
 // Use strict mode
 "strict": true
 
-// Prefer interfaces over types
+// Backend: Use interfaces for data models
 interface User {
-  id: string;
+  id: number;          // Integer in database
   email: string;
-  name: string;
+  name: string | null; // Nullable fields
   role: 'USER' | 'ADMIN';
 }
 
 // Use explicit return types
-function getUser(id: string): Promise<User> {
-  // ...
+async function getUser(id: number): Promise<User | null> {
+  return await prisma.user.findUnique({ where: { id } });
 }
 
-// Use const for immutable values
+// Frontend: Use const for immutable values
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Destructure props
@@ -1425,6 +1913,8 @@ const handleClick = useCallback(() => {
 - Utils: camelCase (formatDate.ts)
 - Constants: UPPER_SNAKE_CASE (API_ENDPOINTS.ts)
 - Types: PascalCase (User.types.ts)
+- Backend Controllers: camelCase + Controller suffix (authController.ts)
+- Backend Routes: camelCase + Routes suffix (authRoutes.ts)
 ```
 
 ### Git Workflow
