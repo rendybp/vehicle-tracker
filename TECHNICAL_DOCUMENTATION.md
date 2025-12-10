@@ -98,6 +98,102 @@ A comprehensive vehicle tracking and management system with role-based access co
 
 ---
 
+### Frontend Package Dependencies
+
+#### Core Dependencies
+```json
+{
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.1",
+    "zustand": "^5.0.2",
+    "axios": "^1.7.7",
+    "react-hook-form": "^7.53.0",
+    "@hookform/resolvers": "^3.9.0",
+    "zod": "^3.23.8",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1",
+    "framer-motion": "^11.5.4",
+    "lucide-react": "^0.446.0",
+    "react-hot-toast": "^2.4.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.2",
+    "date-fns": "^3.6.0"
+  }
+}
+```
+
+#### Dev Dependencies
+```json
+{
+  "devDependencies": {
+    "@vitejs/plugin-react-swc": "^3.7.0",
+    "typescript": "^5.6.2",
+    "tailwindcss": "^4.1.17",
+    "vite": "^5.4.8",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@types/leaflet": "^1.9.12",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47"
+  }
+}
+```
+
+#### TypeScript Configuration (tsconfig.json)
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}
+```
+
+#### Vite Configuration (vite.config.ts)
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
+});
+```
+
 ## Backend Specifications
 
 ### Completed Features ✅
@@ -284,45 +380,660 @@ src/
 
 #### Auth Store
 ```typescript
+interface User {
+  id: number;                    // Integer from backend
+  email: string;
+  name: string | null;
+  role: 'USER' | 'ADMIN';
+  is_active: boolean;
+  created_at: string;            // ISO date string
+  updated_at: string;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;              // Min 6 characters
+  name?: string;
+  role?: 'USER' | 'ADMIN';
+}
+
 interface AuthState {
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  error: string | null;
+  
+  // Actions
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  refreshToken: () => Promise<string>;  // Returns new access token
   setUser: (user: User) => void;
+  setAccessToken: (token: string) => void;
+  clearAuth: () => void;
+  setError: (error: string | null) => void;
 }
+
+// Implementation notes:
+// - Store accessToken in Zustand + localStorage for persistence
+// - Refresh token is in HTTP-only cookie (don't store in frontend)
+// - Call refreshToken() when receiving 401 responses
+// - Clear all auth state on logout
 ```
 
 #### Vehicle Store
 ```typescript
+interface Vehicle {
+  id: number;                    // Integer from backend
+  name: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
+  fuel_level: number;            // Float (0-100)
+  odometer: number;              // Float (kilometers)
+  latitude: number;              // Float (GPS coordinate)
+  longitude: number;             // Float (GPS coordinate)
+  speed: number;                 // Float (km/h)
+  updated_at: string;            // ISO date string
+  created_at: string;
+}
+
+interface VehicleFormData {
+  name: string;
+  fuel_level: number;            // Required (0-100)
+  odometer: number;              // Required (km)
+  latitude: number;              // Required
+  longitude: number;             // Required
+  speed: number;                 // Required (km/h)
+  status?: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE'; // Optional, default: ACTIVE
+}
+
 interface VehicleState {
   vehicles: Vehicle[];
   selectedVehicle: Vehicle | null;
   isLoading: boolean;
   error: string | null;
+  
+  // Actions
   fetchVehicles: () => Promise<void>;
-  fetchVehicleById: (id: string) => Promise<void>;
-  createVehicle: (data: VehicleData) => Promise<void>;
-  updateVehicle: (id: string, data: VehicleData) => Promise<void>;
-  deleteVehicle: (id: string) => Promise<void>;
+  fetchVehicleById: (id: number) => Promise<void>;
+  createVehicle: (data: VehicleFormData) => Promise<void>;  // ADMIN only
+  updateVehicle: (id: number, data: Partial<VehicleFormData>) => Promise<void>; // ADMIN only
+  deleteVehicle: (id: number) => Promise<void>;  // ADMIN only
+  setSelectedVehicle: (vehicle: Vehicle | null) => void;
+  clearError: () => void;
 }
+
+// Implementation notes:
+// - fetchVehicles() and fetchVehicleById() accessible by USER and ADMIN
+// - create/update/delete only accessible by ADMIN (check role before calling)
+// - Backend returns all vehicles (no pagination)
+// - Use snake_case for API requests, store as-is in state
 ```
 
 #### UI Store
 ```typescript
+interface Notification {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+  duration?: number;             // Auto-dismiss after ms (default: 5000)
+}
+
 interface UIState {
   sidebarOpen: boolean;
   theme: 'light' | 'dark';
   notifications: Notification[];
+  
+  // Actions
   toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
   setTheme: (theme: 'light' | 'dark') => void;
-  addNotification: (notification: Notification) => void;
+  addNotification: (notification: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
+  clearNotifications: () => void;
 }
+
+// Implementation notes:
+// - Use react-hot-toast for notifications (already in tech stack)
+// - Store theme preference in localStorage
+// - Sidebar state for mobile responsiveness
+```
+
+### TypeScript Types
+
+#### types/auth.types.ts
+```typescript
+// User from backend
+export interface User {
+  id: number;
+  email: string;
+  name: string | null;
+  role: 'USER' | 'ADMIN';
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Registration form data
+export interface RegisterFormData {
+  email: string;
+  password: string;
+  confirmPassword: string;       // Frontend only
+  name?: string;
+}
+
+// Login form data
+export interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+// API responses
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    accessToken: string;
+  };
+}
+
+export interface RefreshResponse {
+  success: boolean;
+  message: string;
+  data: {
+    accessToken: string;
+  };
+}
+```
+
+#### types/vehicle.types.ts
+```typescript
+// Vehicle from backend
+export interface Vehicle {
+  id: number;
+  name: string;
+  status: VehicleStatus;
+  fuel_level: number;
+  odometer: number;
+  latitude: number;
+  longitude: number;
+  speed: number;
+  updated_at: string;
+  created_at: string;
+}
+
+export type VehicleStatus = 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
+
+// Vehicle form data
+export interface VehicleFormData {
+  name: string;
+  fuel_level: number;
+  odometer: number;
+  latitude: number;
+  longitude: number;
+  speed: number;
+  status?: VehicleStatus;
+}
+
+// For display purposes
+export interface VehicleWithLocation extends Vehicle {
+  position: [number, number];    // [latitude, longitude] for Leaflet
+}
+```
+
+#### types/api.types.ts
+```typescript
+// Standard API response format
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: string;
+}
+
+// API error response
+export interface ApiError {
+  success: false;
+  message: string;
+  error?: string;
+}
+
+// Pagination (if implemented)
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+```
+
+### API Service Layer
+
+#### services/api.ts
+```typescript
+import axios, { AxiosError, AxiosInstance } from 'axios';
+import { useAuthStore } from '../store/authStore';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Create axios instance
+export const api: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,           // Important: send cookies
+});
+
+// Request interceptor: Add access token
+api.interceptors.request.use(
+  (config) => {
+    const token = useAuthStore.getState().accessToken;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor: Handle 401 and refresh token
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError<ApiError>) => {
+    const originalRequest = error.config;
+    
+    // If 401 and not already retried
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Call refresh token endpoint
+        const newToken = await useAuthStore.getState().refreshToken();
+        
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, logout user
+        useAuthStore.getState().clearAuth();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Type augmentation for retry flag
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    _retry?: boolean;
+  }
+}
+```
+
+#### services/authService.ts
+```typescript
+import { api } from './api';
+import { AuthResponse, RefreshResponse, RegisterFormData, LoginFormData } from '../types/auth.types';
+
+export const authService = {
+  // Register new user
+  register: async (data: RegisterFormData) => {
+    const { confirmPassword, ...registerData } = data;
+    const response = await api.post<AuthResponse>('/api/auth/register', registerData);
+    return response.data;
+  },
+
+  // Login user
+  login: async (data: LoginFormData) => {
+    const response = await api.post<AuthResponse>('/api/auth/login', data);
+    return response.data;
+  },
+
+  // Logout user
+  logout: async () => {
+    const response = await api.post('/api/auth/logout');
+    return response.data;
+  },
+
+  // Refresh access token
+  refreshToken: async () => {
+    const response = await api.post<RefreshResponse>('/api/auth/refresh');
+    return response.data;
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    const response = await api.get<ApiResponse<User>>('/api/auth/me');
+    return response.data;
+  },
+};
+```
+
+#### services/vehicleService.ts
+```typescript
+import { api } from './api';
+import { Vehicle, VehicleFormData } from '../types/vehicle.types';
+import { ApiResponse } from '../types/api.types';
+
+export const vehicleService = {
+  // Get all vehicles (USER, ADMIN)
+  getAll: async () => {
+    const response = await api.get<ApiResponse<Vehicle[]>>('/api/vehicles');
+    return response.data;
+  },
+
+  // Get vehicle by ID (USER, ADMIN)
+  getById: async (id: number) => {
+    const response = await api.get<ApiResponse<Vehicle>>(`/api/vehicles/${id}`);
+    return response.data;
+  },
+
+  // Create vehicle (ADMIN only)
+  create: async (data: VehicleFormData) => {
+    const response = await api.post<ApiResponse<Vehicle>>('/api/vehicles', data);
+    return response.data;
+  },
+
+  // Update vehicle (ADMIN only)
+  update: async (id: number, data: Partial<VehicleFormData>) => {
+    const response = await api.put<ApiResponse<Vehicle>>(`/api/vehicles/${id}`, data);
+    return response.data;
+  },
+
+  // Delete vehicle (ADMIN only)
+  delete: async (id: number) => {
+    const response = await api.delete<ApiResponse<void>>(`/api/vehicles/${id}`);
+    return response.data;
+  },
+};
+```
+
+---
+
+### Custom Hooks
+
+#### hooks/useAuth.ts
+```typescript
+import { useAuthStore } from '@/store/authStore';
+import { useNavigate } from 'react-router-dom';
+import { LoginFormData, RegisterFormData } from '@/types/auth.types';
+import toast from 'react-hot-toast';
+
+export const useAuth = () => {
+  const navigate = useNavigate();
+  const { 
+    user, 
+    isAuthenticated, 
+    isLoading, 
+    error,
+    login: loginAction,
+    register: registerAction,
+    logout: logoutAction 
+  } = useAuthStore();
+
+  const login = async (data: LoginFormData) => {
+    try {
+      await loginAction(data.email, data.password);
+      toast.success('Login successful!');
+      navigate('/dashboard');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Login failed');
+      throw err;
+    }
+  };
+
+  const register = async (data: RegisterFormData) => {
+    try {
+      await registerAction(data);
+      toast.success('Registration successful!');
+      navigate('/dashboard');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Registration failed');
+      throw err;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await logoutAction();
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch (err: any) {
+      toast.error('Logout failed');
+    }
+  };
+
+  // Check if user has specific role
+  const hasRole = (role: 'USER' | 'ADMIN') => {
+    return user?.role === role;
+  };
+
+  // Check if user is admin
+  const isAdmin = () => hasRole('ADMIN');
+
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+    error,
+    login,
+    register,
+    logout,
+    hasRole,
+    isAdmin,
+  };
+};
+```
+
+#### hooks/useVehicles.ts
+```typescript
+import { useVehicleStore } from '@/store/vehicleStore';
+import { VehicleFormData } from '@/types/vehicle.types';
+import toast from 'react-hot-toast';
+import { useAuth } from './useAuth';
+
+export const useVehicles = () => {
+  const { isAdmin } = useAuth();
+  const {
+    vehicles,
+    selectedVehicle,
+    isLoading,
+    error,
+    fetchVehicles,
+    fetchVehicleById,
+    createVehicle: createAction,
+    updateVehicle: updateAction,
+    deleteVehicle: deleteAction,
+    setSelectedVehicle,
+  } = useVehicleStore();
+
+  const createVehicle = async (data: VehicleFormData) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can create vehicles');
+      throw new Error('Unauthorized');
+    }
+    
+    try {
+      await createAction(data);
+      toast.success('Vehicle created successfully');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to create vehicle');
+      throw err;
+    }
+  };
+
+  const updateVehicle = async (id: number, data: Partial<VehicleFormData>) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can update vehicles');
+      throw new Error('Unauthorized');
+    }
+    
+    try {
+      await updateAction(id, data);
+      toast.success('Vehicle updated successfully');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update vehicle');
+      throw err;
+    }
+  };
+
+  const deleteVehicle = async (id: number) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can delete vehicles');
+      throw new Error('Unauthorized');
+    }
+    
+    if (!confirm('Are you sure you want to delete this vehicle?')) {
+      return;
+    }
+    
+    try {
+      await deleteAction(id);
+      toast.success('Vehicle deleted successfully');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete vehicle');
+      throw err;
+    }
+  };
+
+  return {
+    vehicles,
+    selectedVehicle,
+    isLoading,
+    error,
+    fetchVehicles,
+    fetchVehicleById,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle,
+    setSelectedVehicle,
+  };
+};
+```
+
+---
+
+### Utilities
+
+#### utils/validators.ts (Zod Schemas)
+```typescript
+import { z } from 'zod';
+
+// Login validation
+export const loginSchema = z.object({
+  email: z.string()
+    .email('Invalid email address')
+    .min(1, 'Email is required'),
+  password: z.string()
+    .min(1, 'Password is required'),
+});
+
+// Registration validation
+export const registerSchema = z.object({
+  email: z.string()
+    .email('Invalid email address')
+    .min(1, 'Email is required'),
+  password: z.string()
+    .min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string()
+    .min(1, 'Please confirm your password'),
+  name: z.string().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+// Vehicle form validation
+export const vehicleSchema = z.object({
+  name: z.string()
+    .min(1, 'Vehicle name is required')
+    .max(255, 'Name is too long'),
+  fuel_level: z.number()
+    .min(0, 'Fuel level must be at least 0')
+    .max(100, 'Fuel level cannot exceed 100'),
+  odometer: z.number()
+    .min(0, 'Odometer must be positive'),
+  latitude: z.number()
+    .min(-90, 'Invalid latitude')
+    .max(90, 'Invalid latitude'),
+  longitude: z.number()
+    .min(-180, 'Invalid longitude')
+    .max(180, 'Invalid longitude'),
+  speed: z.number()
+    .min(0, 'Speed must be positive'),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'MAINTENANCE']).optional(),
+});
+
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type RegisterFormData = z.infer<typeof registerSchema>;
+export type VehicleFormData = z.infer<typeof vehicleSchema>;
+```
+
+#### utils/formatters.ts
+```typescript
+import { format, formatDistanceToNow } from 'date-fns';
+
+// Format ISO date string to readable format
+export const formatDate = (dateString: string): string => {
+  return format(new Date(dateString), 'MMM dd, yyyy');
+};
+
+export const formatDateTime = (dateString: string): string => {
+  return format(new Date(dateString), 'MMM dd, yyyy HH:mm');
+};
+
+// Format relative time (e.g., "2 hours ago")
+export const formatRelativeTime = (dateString: string): string => {
+  return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+};
+
+// Format fuel level with percentage
+export const formatFuelLevel = (level: number): string => {
+  return `${level.toFixed(1)}%`;
+};
+
+// Format odometer reading
+export const formatOdometer = (km: number): string => {
+  return `${km.toLocaleString()} km`;
+};
+
+// Format speed
+export const formatSpeed = (speed: number): string => {
+  return `${speed.toFixed(0)} km/h`;
+};
+
+// Format GPS coordinates
+export const formatCoordinates = (lat: number, lng: number): string => {
+  return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+};
+
+// Get status badge color
+export const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'ACTIVE':
+      return 'bg-green-100 text-green-800';
+    case 'INACTIVE':
+      return 'bg-gray-100 text-gray-800';
+    case 'MAINTENANCE':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 ```
 
 ---
@@ -440,24 +1151,272 @@ Redirect to home/login page
 ### Authorization Middleware (Frontend)
 
 ```typescript
-// ProtectedRoute.tsx
-const ProtectedRoute = ({ 
+// components/auth/ProtectedRoute.tsx
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '@/store/authStore';
+import { ReactNode } from 'react';
+
+interface ProtectedRouteProps {
+  children: ReactNode;
+  requiredRole?: 'USER' | 'ADMIN';
+  allowedRoles?: ('USER' | 'ADMIN')[];
+}
+
+export const ProtectedRoute = ({ 
   children, 
-  requiredRole 
+  requiredRole,
+  allowedRoles 
 }: ProtectedRouteProps) => {
   const { isAuthenticated, user } = useAuthStore();
+  const location = useLocation();
   
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+  // Check authentication
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/dashboard" />;
+  // Check single required role
+  if (requiredRole && user.role !== requiredRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Check allowed roles (more flexible)
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
 };
+
+// Usage examples:
+// <ProtectedRoute><DashboardPage /></ProtectedRoute>  // Any authenticated user
+// <ProtectedRoute requiredRole="ADMIN"><AdminPage /></ProtectedRoute>  // Admin only
+// <ProtectedRoute allowedRoles={['USER', 'ADMIN']}><VehiclesPage /></ProtectedRoute>  // Both
 ```
+
+---
+
+### Key Component Specifications
+
+#### components/auth/LoginForm.tsx
+**Purpose**: Handle user login with email and password
+
+**Props**: None (uses useAuth hook)
+
+**Validation**: Zod schema (`loginSchema`)
+
+**Features**:
+- Email and password input fields
+- Form validation with error messages
+- Loading state during submission
+- Remember me checkbox (optional)
+- Link to registration page
+- Toast notifications for success/error
+
+**Integration**:
+```typescript
+const { login, isLoading } = useAuth();
+const handleSubmit = async (data: LoginFormData) => {
+  await login(data); // Automatically navigates on success
+};
+```
+
+#### components/auth/RegisterForm.tsx
+**Purpose**: Handle new user registration
+
+**Props**: None (uses useAuth hook)
+
+**Validation**: Zod schema (`registerSchema`)
+
+**Features**:
+- Email, password, confirm password, name (optional) fields
+- Password strength indicator
+- Form validation with inline error messages
+- Loading state during submission
+- Link to login page
+- Toast notifications for success/error
+
+**Password Requirements**:
+- Minimum 6 characters (enforced by backend)
+- Frontend can add visual indicators for strong passwords
+
+#### components/vehicles/VehicleCard.tsx
+**Purpose**: Display individual vehicle information in card format
+
+**Props**:
+```typescript
+interface VehicleCardProps {
+  vehicle: Vehicle;
+  onEdit?: (id: number) => void;  // ADMIN only
+  onDelete?: (id: number) => void; // ADMIN only
+  onViewDetails?: (id: number) => void;
+}
+```
+
+**Features**:
+- Vehicle name, status badge (colored by getStatusColor)
+- Fuel level progress bar
+- Odometer reading (formatted with formatOdometer)
+- Speed indicator
+- Last updated timestamp (formatRelativeTime)
+- Action buttons (edit/delete) visible only to admins
+- Click to view details
+
+**Styling**:
+- TailwindCSS card with shadow
+- Responsive grid layout
+- Status-based color coding
+
+#### components/vehicles/VehicleMap.tsx
+**Purpose**: Display vehicle locations on interactive map
+
+**Props**:
+```typescript
+interface VehicleMapProps {
+  vehicles: Vehicle[];
+  selectedVehicle?: Vehicle | null;
+  onVehicleSelect?: (vehicle: Vehicle) => void;
+  center?: [number, number]; // Default to first vehicle or [0, 0]
+  zoom?: number; // Default to 13
+}
+```
+
+**Features**:
+- Leaflet map with OpenStreetMap tiles
+- Marker for each vehicle with custom icon
+- Popup showing vehicle details on click
+- Auto-center on selected vehicle
+- Zoom controls
+- Vehicle status-based marker colors
+
+**Integration**:
+```typescript
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+// Use formatCoordinates, formatSpeed, formatFuelLevel for popup content
+```
+
+#### components/vehicles/VehicleForm.tsx
+**Purpose**: Create or update vehicle data
+
+**Props**:
+```typescript
+interface VehicleFormProps {
+  vehicle?: Vehicle; // If editing, undefined for create
+  onSubmit: (data: VehicleFormData) => Promise<void>;
+  onCancel: () => void;
+}
+```
+
+**Validation**: Zod schema (`vehicleSchema`)
+
+**Features**:
+- All vehicle fields (name, fuel_level, odometer, latitude, longitude, speed, status)
+- Number inputs with min/max validation
+- Status dropdown (ACTIVE, INACTIVE, MAINTENANCE)
+- Map picker for coordinates (optional enhancement)
+- Form validation with inline errors
+- Cancel and Submit buttons
+- Loading state during submission
+
+---
+
+### Routing Configuration
+
+#### src/App.tsx
+```typescript
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/authStore';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+
+// Pages
+import HomePage from '@/pages/HomePage';
+import LoginPage from '@/pages/auth/LoginPage';
+import RegisterPage from '@/pages/auth/RegisterPage';
+import DashboardPage from '@/pages/DashboardPage';
+import VehiclesPage from '@/pages/vehicles/VehiclesPage';
+import VehicleDetailsPage from '@/pages/vehicles/VehicleDetailsPage';
+import AdminPage from '@/pages/admin/AdminPage';
+import NotFoundPage from '@/pages/NotFoundPage';
+
+function App() {
+  const { isAuthenticated } = useAuthStore();
+
+  return (
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} 
+        />
+        <Route 
+          path="/register" 
+          element={isAuthenticated ? <Navigate to="/dashboard" /> : <RegisterPage />} 
+        />
+
+        {/* Protected Routes - Any authenticated user */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehicles"
+          element={
+            <ProtectedRoute>
+              <VehiclesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehicles/:id"
+          element={
+            <ProtectedRoute>
+              <VehicleDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Only Routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+#### Route Structure Summary
+```
+/ (public)                    - Home/Landing page
+/login (public)               - Login form
+/register (public)            - Registration form
+/dashboard (protected)        - User dashboard with vehicle overview
+/vehicles (protected)         - Vehicle list/grid view with map
+/vehicles/:id (protected)     - Vehicle detail page with history
+/admin (admin only)           - Admin panel (user management)
+```
+
+#### Navigation Flow
+1. **Guest User**: Can access `/`, `/login`, `/register`
+2. **Authenticated User**: Redirected from auth pages to `/dashboard`
+3. **Protected Pages**: Redirect to `/login` if not authenticated
+4. **Admin Pages**: Show 403 error or redirect if not ADMIN role
 
 ---
 
