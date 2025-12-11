@@ -1,12 +1,52 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { AxiosError } from 'axios';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogIn, Eye, EyeOff, ArrowLeft } from 'lucide-react';
-
+import { LogIn, Loader2, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { loginSchema, type LoginFormData } from '../../lib/schemas';
+import { authService } from '../../services/authService';
+import { useAuthStore } from '../../stores/authStore';
+import { cn } from '../../lib/utils';
 
 export const LoginPage = () => {
-    
+    const navigate = useNavigate();
+    const location = useLocation();
+    const setAuth = useAuthStore((state) => state.setAuth);
+    const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Redirect to where the user came from, or dashboard
+    const from = location.state?.from?.pathname || '/dashboard';
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+    });
+
+    const onSubmit = async (data: LoginFormData) => {
+        setIsLoading(true);
+        try {
+        const response = await authService.login(data);
+        if (response.success && response.data) {
+            setAuth(response.data.user, response.data.accessToken);
+            toast.success('Welcome back!');
+            navigate(from, { replace: true });
+        }
+        } catch (err) {
+        const error = err as AxiosError<{ message: string }>;
+        console.error(error);
+        const msg = error.response?.data?.message || 'Login failed. Please check your credentials.';
+        toast.error(msg);
+        } finally {
+        setIsLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
@@ -28,16 +68,23 @@ export const LoginPage = () => {
             <p className="text-gray-500 text-sm mt-2">Sign in to your account to continue</p>
             </div>
 
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
                 <input
                 type="email"
-                className={
-                    "w-full px-4 py-2 rounded-lg border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
-                }
+                {...register('email')}
+                className={cn(
+                    "w-full px-4 py-2 rounded-lg border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all",
+                    errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700"
+                )}
                 placeholder="you@example.com"
                 />
+                {errors.email && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> {errors.email.message}
+                </p>
+                )}
             </div>
 
             <div className="space-y-2">
@@ -47,9 +94,11 @@ export const LoginPage = () => {
                 <div className="relative">
                 <input
                     type={showPassword ? "text" : "password"}
-                    className={
-                    "w-full px-4 py-2 rounded-lg border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all pr-10"
-                    }
+                    {...register('password')}
+                    className={cn(
+                    "w-full px-4 py-2 rounded-lg border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all pr-10",
+                    errors.password ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700"
+                    )}
                     placeholder="••••••••"
                 />
                 <button
@@ -60,13 +109,19 @@ export const LoginPage = () => {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
                 </div>
+                {errors.password && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> {errors.password.message}
+                </p>
+                )}
             </div>
 
             <button
                 type="submit"
+                disabled={isLoading}
                 className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg shadow-lg shadow-brand-500/30 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
-            Sign In
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
             </button>
             </form>
 
