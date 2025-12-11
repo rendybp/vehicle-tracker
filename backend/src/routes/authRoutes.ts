@@ -69,8 +69,8 @@ const router = Router();
  *         password:
  *           type: string
  *           format: password
- *           minLength: 6
- *           example: password123
+ *           minLength: 8
+ *           example: Password123#
  *         name:
  *           type: string
  *           example: John Doe
@@ -88,7 +88,7 @@ const router = Router();
  *         password:
  *           type: string
  *           format: password
- *           example: password123
+ *           example: Password123#
  *     
  *     AuthResponse:
  *       type: object
