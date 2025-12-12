@@ -43,7 +43,7 @@ export const DashboardLayout = () => {
             <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 fixed h-full z-10 transition-colors duration-300">
                 <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
                     <MapPin className="h-6 w-6 text-brand-600" />
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">VehicleTracker</span>
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Vehicle Tracker</span>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -76,7 +76,7 @@ export const DashboardLayout = () => {
                     </div>
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
                     >
                         <LogOut className="h-5 w-5" />
                         Logout
@@ -88,9 +88,9 @@ export const DashboardLayout = () => {
             <div className="md:hidden fixed top-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-20 px-4 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <MapPin className="h-6 w-6 text-brand-600" />
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">VehicleTracker</span>
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Vehicle Tracker</span>
                 </div>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 dark:text-gray-400">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 dark:text-gray-400 cursor-pointer">
                     {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </button>
             </div>
@@ -102,8 +102,8 @@ export const DashboardLayout = () => {
 
             {/* Mobile Sidebar */}
             <aside className={cn(
-                "fixed top-16 bottom-0 left-0 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-20 md:hidden transition-transform duration-300 transform",
-                isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+                "fixed top-16 bottom-0 right-0 w-64 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-20 md:hidden transition-transform duration-300 transform",
+                isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
             )}>
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {filteredNavItems.map((item) => (
@@ -124,7 +124,7 @@ export const DashboardLayout = () => {
                     ))}
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mt-4 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mt-4 transition-colors cursor-pointer"
                     >
                         <LogOut className="h-5 w-5" />
                         Logout
