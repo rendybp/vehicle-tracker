@@ -7,8 +7,11 @@ import { Dashboard } from './pages/dashboard/Dashboard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
+import { useAuthSync } from './hooks/useAuthSync';
 
 function App() {
+
+  useAuthSync();
 
   return (
     <>
