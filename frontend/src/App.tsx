@@ -5,6 +5,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
 
 function App() {
@@ -15,8 +16,12 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+
+        {/* Check Authentication for Public Routes */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Route>
 
         {/* User Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={['USER', 'ADMIN']} />}>

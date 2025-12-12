@@ -1,5 +1,5 @@
 import { useState, type SVGProps } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { LayoutDashboard, Truck, Users, LogOut, Menu, X, MapPin } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { authService } from '../../services/authService';
@@ -42,8 +42,10 @@ export const DashboardLayout = () => {
             {/* Sidebar Desktop */}
             <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 fixed h-full z-10 transition-colors duration-300">
                 <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
-                    <MapPin className="h-6 w-6 text-brand-600" />
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Vehicle Tracker</span>
+                <MapPin className="h-6 w-6 text-brand-600" />
+                    <Link to="/">
+                        <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Vehicle Tracker</span>
+                    </Link>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

@@ -4,7 +4,7 @@ export const Dashboard = () => {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard Overview</h1>
+            <h1 className="mt-6 sm:mt-0 text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard Overview</h1>
 
             {/* Map Placeholder */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
