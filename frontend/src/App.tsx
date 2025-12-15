@@ -4,6 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { Dashboard } from './pages/dashboard/Dashboard';
+import { VehicleList } from './pages/dashboard/VehicleList';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
@@ -30,6 +31,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['USER', 'ADMIN']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/vehicles" element={<VehicleList />} />
           </Route>
         </Route>
       </Routes>
