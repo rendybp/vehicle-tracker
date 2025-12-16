@@ -5,6 +5,8 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { VehicleList } from './pages/dashboard/VehicleList';
+import { VehicleDetail } from './pages/dashboard/VehicleDetail';
+import { VehicleForm } from './pages/dashboard/VehicleForm';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
@@ -32,6 +34,15 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/vehicles" element={<VehicleList />} />
+            <Route path="/vehicles/:id" element={<VehicleDetail />} />
+          </Route>
+        </Route>
+
+        {/* Admin Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/vehicles/new" element={<VehicleForm />} />
+            <Route path="/vehicles/:id/edit" element={<VehicleForm />} />
           </Route>
         </Route>
       </Routes>
