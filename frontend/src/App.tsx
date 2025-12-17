@@ -7,6 +7,7 @@ import { Dashboard } from './pages/dashboard/Dashboard';
 import { VehicleList } from './pages/dashboard/VehicleList';
 import { VehicleDetail } from './pages/dashboard/VehicleDetail';
 import { VehicleForm } from './pages/dashboard/VehicleForm';
+import { UserManagement } from './pages/admin/UserManagement';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
@@ -43,6 +44,8 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route path="/vehicles/new" element={<VehicleForm />} />
             <Route path="/vehicles/:id/edit" element={<VehicleForm />} />
+
+            <Route path="/admin/users" element={<UserManagement />} />
           </Route>
         </Route>
       </Routes>
