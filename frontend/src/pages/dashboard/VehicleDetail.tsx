@@ -6,6 +6,7 @@ import type { Vehicle } from '../../types';
 import { StatusBadge } from './Dashboard';
 import { useAuthStore } from '../../stores/authStore';
 import toast from 'react-hot-toast';
+import { DeleteConfirmationModal } from '../../components/DeleteConfirmationModal';
 
 export const VehicleDetail = () => {
     const { id } = useParams();
@@ -13,6 +14,7 @@ export const VehicleDetail = () => {
     const { user } = useAuthStore();
     const [vehicle, setVehicle] = useState<Vehicle | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -32,8 +34,8 @@ export const VehicleDetail = () => {
         loadData();
     }, [id]);
 
-    const handleDelete = async () => {
-        if (!vehicle || !confirm('Are you sure you want to delete this vehicle?')) return;
+    const handleConfirmDelete = async () => {
+        if (!vehicle) return;
         try {
             await vehicleService.delete(vehicle.id);
             toast.success('Vehicle deleted');
@@ -70,7 +72,7 @@ export const VehicleDetail = () => {
                             <Edit className="h-4 w-4" /> Edit
                         </Link>
                         <button 
-                            onClick={handleDelete}
+                            onClick={() => setIsDeleteModalOpen(true)}
                             className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center gap-2 transition-all"
                         >
                             <Trash2 className="h-4 w-4" /> Delete
@@ -138,6 +140,13 @@ export const VehicleDetail = () => {
                     </div>
                 </div>
             </div>
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                itemName={vehicle.name}
+            />
         </div>
     );
 };
