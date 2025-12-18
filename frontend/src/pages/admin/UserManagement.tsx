@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { User as UserIcon, Shield, Mail, Calendar, Search, Plus, Filter, Edit2, Trash2, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { userService } from '../../services/userService';
 import type { UserResponse, RegisterRequest } from '../../types';
 import { DeleteConfirmationModal } from '../../components/DeleteConfirmationModal';
@@ -52,17 +53,23 @@ export const UserManagement = () => {
 
             if (selectedUser) {
                 await userService.update(selectedUser.id, formattedData);
-                // toast.success('User updated successfully');
+                toast.success('User updated successfully');
             } else {
                 await userService.create(formattedData);
-                // toast.success('User created successfully');
+                toast.success('User created successfully');
             }
             await loadUsers();
             setIsFormOpen(false);
             setSelectedUser(null);
         } catch (error) {
             console.error('Failed to save user', error);
-            // toast.error('Failed to save user');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const message = (error as any)?.response?.data?.message || 'Failed to save user';
+            if (message.toLowerCase().includes('email')) {
+                 toast.error('Email is already in use');
+            } else {
+                 toast.error(message);
+            }
         } finally {
             setIsSaving(false);
         }
@@ -72,13 +79,13 @@ export const UserManagement = () => {
         if (!selectedUser) return;
         try {
             await userService.delete(selectedUser.id);
-            // toast.success('User deleted successfully');
+            toast.success('User deleted successfully');
             await loadUsers();
             setIsDeleteOpen(false);
             setSelectedUser(null);
         } catch (error) {
             console.error('Failed to delete user', error);
-            // toast.error('Failed to delete user');
+            toast.error('Failed to delete user');
         }
     };
 

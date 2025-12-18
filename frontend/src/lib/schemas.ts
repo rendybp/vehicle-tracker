@@ -21,6 +21,15 @@ export const registerSchema = z
       ),
     confirmPassword: z.string(),
     role: z.enum(["USER", "ADMIN"]).optional(),
+    is_active: z
+      .union([z.boolean(), z.string()])
+      .optional()
+      .default(true)
+      .transform((val) => {
+        if (val === "true") return true;
+        if (val === "false") return false;
+        return Boolean(val);
+      }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
