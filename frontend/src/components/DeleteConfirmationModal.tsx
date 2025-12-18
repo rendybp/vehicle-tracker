@@ -9,6 +9,8 @@ interface DeleteConfirmationModalProps {
     title?: string;
     message?: string;
     itemName?: string;
+    cancelText?: string;
+    confirmText?: string;
 }
 
 export const DeleteConfirmationModal = ({
@@ -17,7 +19,9 @@ export const DeleteConfirmationModal = ({
     onConfirm,
     title = "Delete Item",
     message = "Are you sure you want to delete this item? This action cannot be undone.",
-    itemName
+    itemName,
+    cancelText = "Cancel",
+    confirmText = "Delete"
 }: DeleteConfirmationModalProps) => {
     // Prevent scrolling when modal is open
     useEffect(() => {
@@ -86,7 +90,7 @@ export const DeleteConfirmationModal = ({
                                 onClick={onClose}
                                 className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow"
                             >
-                                Cancel
+                                {cancelText}
                             </button>
                             <button
                                 onClick={() => {
@@ -95,7 +99,7 @@ export const DeleteConfirmationModal = ({
                                 }}
                                 className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-lg shadow-red-600/20 transition-all transform active:scale-95"
                             >
-                                Delete Vehicle
+                                {confirmText}
                             </button>
                         </div>
                     </motion.div>
