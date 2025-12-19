@@ -99,7 +99,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                                 {initialData ? 'Edit User' : 'Add New User'}
                             </h2>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
@@ -159,12 +159,12 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                                 {...register('password')}
                                                 type={showPassword ? "text" : "password"}
                                                 className={`w-full pl-10 pr-10 py-2 rounded-lg border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-brand-500'} bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 outline-none transition-all`}
-                                                placeholder={initialData ? "New password" : "••••••"}
+                                                placeholder={initialData ? "New password" : "Enter a password"}
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
                                             >
                                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                             </button>
@@ -183,12 +183,12 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                                 {...register('confirmPassword')}
                                                 type={showConfirmPassword ? "text" : "password"}
                                                 className={`w-full pl-10 pr-10 py-2 rounded-lg border ${errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-brand-500'} bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 outline-none transition-all`}
-                                                placeholder={initialData ? "Confirm new" : "••••••"}
+                                                placeholder={initialData ? "Confirm new" : "Confirm password"}
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
                                             >
                                                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                             </button>
@@ -237,14 +237,14 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-lg shadow-brand-600/20 transition-all flex items-center gap-2"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-lg shadow-brand-600/20 transition-all flex items-center gap-2 cursor-pointer"
                                 >
                                     {isLoading ? 'Saving...' : (
                                         <>
