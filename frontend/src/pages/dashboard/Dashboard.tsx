@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Truck, Activity, Wrench, AlertTriangle, type LucideIcon } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { cn } from '../../lib/utils';
 
 export const Dashboard = () => {
+    const navigate = useNavigate();
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -45,24 +47,28 @@ export const Dashboard = () => {
                     value={stats.total}
                     icon={Truck}
                     className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                    onClick={() => navigate('/vehicles')}
                 />
                 <StatsCard
                     label="Active"
                     value={stats.active}
                     icon={Activity}
                     className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+                    onClick={() => navigate('/vehicles?status=ACTIVE')}
                 />
                 <StatsCard
                     label="Maintenance"
                     value={stats.maintenance}
                     icon={Wrench}
                     className="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
+                    onClick={() => navigate('/vehicles?status=MAINTENANCE')}
                 />
                 <StatsCard
                     label="Inactive"
                     value={stats.inactive}
                     icon={AlertTriangle}
                     className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    onClick={() => navigate('/vehicles?status=INACTIVE')}
                 />
             </div>
 
@@ -93,7 +99,11 @@ export const Dashboard = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {vehicles.slice(0, 5).map(vehicle => (
-                                <tr key={vehicle.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <tr
+                                    key={vehicle.id}
+                                    onClick={() => navigate(`/vehicles/${vehicle.id}`)}
+                                    className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                >
                                     <td className="py-3 font-medium text-gray-900 dark:text-gray-100">{vehicle.name}</td>
                                     <td className="py-3">
                                         <StatusBadge status={vehicle.status} />
@@ -118,10 +128,17 @@ interface StatsCardProps {
     value: string | number;
     icon: LucideIcon;
     className?: string;
+    onClick?: () => void;
 }
 
-export const StatsCard = ({ label, value, icon: Icon, className }: StatsCardProps) => (
-    <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 flex items-center gap-4 transition-transform hover:-translate-y-1">
+export const StatsCard = ({ label, value, icon: Icon, className, onClick }: StatsCardProps) => (
+    <div
+        onClick={onClick}
+        className={cn(
+            "bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 flex items-center gap-4 transition-transform hover:-translate-y-1",
+            onClick && "cursor-pointer hover:shadow-md active:scale-95 transition-all"
+        )}
+    >
         <div className={cn("p-3 rounded-lg", className)}>
             <Icon className="h-6 w-6" />
         </div>

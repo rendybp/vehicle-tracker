@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Fuel, Gauge, SlidersHorizontal, Plus, X, Check, ArrowUp, ArrowDown } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
@@ -15,13 +15,42 @@ export const VehicleList = () => {
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // Filter & Sort State
+    const [searchParams, setSearchParams] = useSearchParams();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [filterStatus, setFilterStatus] = useState<FilterStatus>('ALL');
+
+    // Initialize filter from URL or default to ALL
+    const [filterStatus, setFilterStatus] = useState<FilterStatus>(() => {
+        const statusParam = searchParams.get('status') as FilterStatus;
+        return ['ALL', 'ACTIVE', 'INACTIVE', 'MAINTENANCE'].includes(statusParam) ? statusParam : 'ALL';
+    });
+
     const [sortField, setSortField] = useState<SortField>('updated_at');
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-    
+
+    // Sync URL with state when params change (handle browser navigation)
+    useEffect(() => {
+        const statusParam = searchParams.get('status') as FilterStatus;
+        if (statusParam && ['ALL', 'ACTIVE', 'INACTIVE', 'MAINTENANCE'].includes(statusParam)) {
+            setFilterStatus(statusParam);
+        } else if (!statusParam) {
+            setFilterStatus('ALL');
+        }
+    }, [searchParams]);
+
+    const handleFilterChange = (status: FilterStatus) => {
+        setFilterStatus(status);
+        setSearchParams((prev: URLSearchParams) => {
+            if (status === 'ALL') {
+                prev.delete('status');
+                return prev;
+            }
+            prev.set('status', status);
+            return prev;
+        });
+    };
+
     const filterRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -91,11 +120,11 @@ export const VehicleList = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h1 className="mt-6 sm:mt-0 text-2xl font-bold text-gray-900 dark:text-gray-100">Vehicles</h1>
                 {user?.role === 'ADMIN' && (
-                    <Link 
-                        to="/vehicles/new" 
+                    <Link
+                        to="/vehicles/new"
                         className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 flex items-center gap-2 transition-colors w-fit"
                     >
-                        <Plus className="h-4 w-4" /> 
+                        <Plus className="h-4 w-4" />
                         Add Vehicle
                     </Link>
                 )}
@@ -122,7 +151,7 @@ export const VehicleList = () => {
                     )}
                 </div>
                 <div className="relative" ref={filterRef}>
-                    <button 
+                    <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                         className={`px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors cursor-pointer ${isFilterOpen ? 'ring-2 ring-brand-500 border-transparent' : ''}`}
                     >
@@ -134,14 +163,14 @@ export const VehicleList = () => {
                         <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden z-20">
                             <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
                                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Filters & Sort</h3>
-                                <button 
+                                <button
                                     onClick={() => setIsFilterOpen(false)}
                                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
-                            
+
                             <div className="p-4 space-y-6">
                                 {/* Status Filter */}
                                 <div className="space-y-3">
@@ -150,12 +179,11 @@ export const VehicleList = () => {
                                         {(['ALL', 'ACTIVE', 'INACTIVE', 'MAINTENANCE'] as FilterStatus[]).map((status) => (
                                             <button
                                                 key={status}
-                                                onClick={() => setFilterStatus(status)}
-                                                className={`px-3 py-2 text-sm rounded-lg border transition-all cursor-pointer ${
-                                                    filterStatus === status
-                                                        ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-500 text-brand-700 dark:text-brand-400'
-                                                        : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700'
-                                                }`}
+                                                onClick={() => handleFilterChange(status)}
+                                                className={`px-3 py-2 text-sm rounded-lg border transition-all cursor-pointer ${filterStatus === status
+                                                    ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-500 text-brand-700 dark:text-brand-400'
+                                                    : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700'
+                                                    }`}
                                             >
                                                 {status.charAt(0) + status.slice(1).toLowerCase()}
                                             </button>
@@ -167,7 +195,7 @@ export const VehicleList = () => {
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Sort By</label>
-                                        <button 
+                                        <button
                                             onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
                                             className="text-xs flex items-center gap-1 text-brand-600 hover:text-brand-700 dark:text-brand-400 cursor-pointer"
                                         >
@@ -186,11 +214,10 @@ export const VehicleList = () => {
                                             <button
                                                 key={field.id}
                                                 onClick={() => toggleSort(field.id as SortField)}
-                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
-                                                    sortField === field.id
-                                                        ? 'bg-gray-50 dark:bg-gray-800 text-brand-600 dark:text-brand-400 font-medium'
-                                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                                                }`}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${sortField === field.id
+                                                    ? 'bg-gray-50 dark:bg-gray-800 text-brand-600 dark:text-brand-400 font-medium'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                                    }`}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     {field.icon && <field.icon className="h-4 w-4 opacity-70" />}
@@ -204,11 +231,11 @@ export const VehicleList = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex justify-end">
                                 <button
                                     onClick={() => {
-                                        setFilterStatus('ALL');
+                                        handleFilterChange('ALL');
                                         setSortField('updated_at');
                                         setSortOrder('desc');
                                     }}
@@ -265,7 +292,7 @@ export const VehicleList = () => {
                             <Search className="h-12 w-12 mb-4 opacity-20" />
                             <p className="text-lg font-medium">No vehicles found</p>
                             <p className="text-sm opacity-70">Try adjusting your search or filters</p>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setSearchTerm('');
                                     setFilterStatus('ALL');
