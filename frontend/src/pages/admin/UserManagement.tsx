@@ -121,7 +121,7 @@ export const UserManagement = () => {
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
                 <button 
                     onClick={openAddModal}
-                    className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 flex items-center gap-2 transition-colors w-fit shadow-lg shadow-brand-600/20"
+                    className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 flex items-center gap-2 transition-colors w-fit shadow-lg shadow-brand-600/20 cursor-pointer"
                 >
                     <Plus className="h-4 w-4" /> 
                     Add User
@@ -142,7 +142,7 @@ export const UserManagement = () => {
                     {searchTerm && (
                         <button
                             onClick={() => setSearchTerm('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -152,7 +152,7 @@ export const UserManagement = () => {
                 <div className="flex gap-2 relative">
                     <button 
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className={`px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors ${isFilterOpen ? 'ring-2 ring-brand-500 border-transparent' : ''}`}
+                        className={`px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors cursor-pointer ${isFilterOpen ? 'ring-2 ring-brand-500 border-transparent' : ''}`}
                     >
                         <Filter className="h-4 w-4" /> 
                         <span className="hidden sm:inline">Filters</span>
@@ -165,7 +165,7 @@ export const UserManagement = () => {
                                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Filters</h3>
                                 <button 
                                     onClick={() => setIsFilterOpen(false)}
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -179,7 +179,7 @@ export const UserManagement = () => {
                                             <button
                                                 key={role}
                                                 onClick={() => setFilterRole(role)}
-                                                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                                                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all cursor-pointer ${
                                                     filterRole === role
                                                         ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-500 text-brand-700 dark:text-brand-400'
                                                         : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700'
@@ -198,7 +198,7 @@ export const UserManagement = () => {
                                             <button
                                                 key={status}
                                                 onClick={() => setFilterStatus(status)}
-                                                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                                                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all cursor-pointer ${
                                                     filterStatus === status
                                                         ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-500 text-brand-700 dark:text-brand-400'
                                                         : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700'
@@ -217,7 +217,7 @@ export const UserManagement = () => {
                                         setFilterRole('ALL');
                                         setFilterStatus('ALL');
                                     }}
-                                    className="text-xs text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium"
+                                    className="text-xs text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium cursor-pointer"
                                 >
                                     Reset Filters
                                 </button>
@@ -299,14 +299,14 @@ export const UserManagement = () => {
                                             <div className="flex items-center justify-end gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity opacity-100">
                                                 <button 
                                                     onClick={() => openEditModal(user)}
-                                                    className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                                                    className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors cursor-pointer"
                                                     title="Edit User"
                                                 >
                                                     <Edit2 className="h-4 w-4" />
                                                 </button>
                                                 <button 
                                                     onClick={() => confirmDelete(user)}
-                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                                     title="Delete User"
                                                 >
                                                     <Trash2 className="h-4 w-4" />

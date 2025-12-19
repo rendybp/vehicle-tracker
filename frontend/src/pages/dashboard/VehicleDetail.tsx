@@ -53,7 +53,7 @@ export const VehicleDetail = () => {
         <div className="max-w-5xl mx-auto space-y-6">
             <button 
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
             >
                 <ArrowLeft className="h-4 w-4" /> Back to Vehicles
             </button>
@@ -73,7 +73,7 @@ export const VehicleDetail = () => {
                         </Link>
                         <button 
                             onClick={() => setIsDeleteModalOpen(true)}
-                            className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center gap-2 transition-all"
+                            className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center gap-2 transition-all cursor-pointer"
                         >
                             <Trash2 className="h-4 w-4" /> Delete
                         </button>
@@ -145,7 +145,10 @@ export const VehicleDetail = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
+                title="Delete Vehicle"
+                message="Are you sure you want to delete this vehicle?"
                 itemName={vehicle.name}
+                confirmText="Delete Vehicle"
             />
         </div>
     );
