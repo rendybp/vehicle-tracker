@@ -63,7 +63,7 @@ export const DeleteConfirmationModal = ({
                             </div>
                             <button 
                                 onClick={onClose}
-                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -88,7 +88,7 @@ export const DeleteConfirmationModal = ({
                         <div className="p-6 pt-2 flex gap-3 justify-end bg-gray-50/50 dark:bg-gray-800/20">
                             <button
                                 onClick={onClose}
-                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow"
+                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow cursor-pointer"
                             >
                                 {cancelText}
                             </button>
@@ -97,7 +97,7 @@ export const DeleteConfirmationModal = ({
                                     onConfirm();
                                     onClose(); // Optional: Close immediately, or let parent handle
                                 }}
-                                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-lg shadow-red-600/20 transition-all transform active:scale-95"
+                                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-lg shadow-red-600/20 transition-all transform active:scale-95 cursor-pointer"
                             >
                                 {confirmText}
                             </button>

@@ -145,7 +145,10 @@ export const VehicleDetail = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
+                title="Delete Vehicle"
+                message="Are you sure you want to delete this vehicle?"
                 itemName={vehicle.name}
+                confirmText="Delete Vehicle"
             />
         </div>
     );
