@@ -4,6 +4,7 @@ import { Truck, Activity, Wrench, AlertTriangle, type LucideIcon } from 'lucide-
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { cn } from '../../lib/utils';
+import { FleetMap } from '../../components/FleetMap';
 
 export const Dashboard = () => {
     const navigate = useNavigate();
@@ -72,15 +73,11 @@ export const Dashboard = () => {
                 />
             </div>
 
-            {/* Map Placeholder */}
+            {/* Live Fleet Map */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
                 <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Live Fleet Map</h2>
-                <div className="w-full h-96 bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400">
-                    <div className="text-center">
-                        <Truck className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p className="font-medium">Map Component Placeholder</p>
-                        <p className="text-sm">Interactive map will be implemented here</p>
-                    </div>
+                <div className="w-full h-80 lg:h-96 rounded-lg overflow-hidden">
+                    <FleetMap vehicles={vehicles} />
                 </div>
             </div>
 
