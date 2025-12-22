@@ -51,12 +51,12 @@ export const VehicleDetail = () => {
     if (!vehicle) return <div className="p-8">Vehicle not found</div>;
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6">
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
             >
-                <ArrowLeft className="h-4 w-4" /> Back to Vehicles
+                <ArrowLeft className="h-4 w-4" /> Back
             </button>
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -85,7 +85,7 @@ export const VehicleDetail = () => {
             <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-6">
                     {/* Live Map */}
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1 h-96 flex flex-col">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1 h-133 flex flex-col">
                         <h2 className="text-lg font-semibold px-5 py-3">Live Location</h2>
                         <div className="flex-1 rounded-lg overflow-hidden relative">
                             <SingleVehicleMap vehicle={vehicle} />
