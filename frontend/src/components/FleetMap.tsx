@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Vehicle } from '../types';
-import { Truck, Navigation } from 'lucide-react';
+import { Car, Navigation } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,14 +39,17 @@ export const FleetMap = ({ vehicles }: FleetMapProps) => {
 
     // Create custom icon
     const createCustomIcon = (status: Vehicle['status']) => {
-        const colorClass =
-            status === 'ACTIVE' ? 'text-green-600' :
-                status === 'MAINTENANCE' ? 'text-orange-600' :
-                    'text-gray-600';
+        const statusClasses = {
+            ACTIVE: 'text-green-600 border-green-500',
+            MAINTENANCE: 'text-orange-600 border-orange-500',
+            INACTIVE: 'text-gray-600 border-gray-500' // Default / Inactive
+        };
+
+        const activeClass = statusClasses[status] || statusClasses['INACTIVE'];
 
         const iconMarkup = renderToStaticMarkup(
-            <div className={`bg-white p-1.5 rounded-full shadow-md border-2 border-white ${colorClass}`}>
-                <Truck size={20} fill="currentColor" className="opacity-90" />
+            <div className={`bg-white p-1.5 rounded-full shadow-md border-2 ${activeClass}`}>
+                <Car size={20} color="currentColor" className="opacity-90" />
             </div>
         );
 
@@ -88,8 +91,8 @@ export const FleetMap = ({ vehicles }: FleetMapProps) => {
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="font-bold text-gray-900 text-sm">{vehicle.name}</h3>
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                            vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
-                                                'bg-gray-100 text-gray-700'
+                                        vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
+                                            'bg-gray-100 text-gray-700'
                                         }`}>
                                         {vehicle.status}
                                     </span>

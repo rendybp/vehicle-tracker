@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Truck, Fuel, Gauge, Calendar, Clock, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Car, Fuel, Gauge, Calendar, Clock, Edit, Trash2 } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { StatusBadge } from './Dashboard';
@@ -114,7 +114,7 @@ export const VehicleDetail = () => {
                             </div>
                             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                                 <div className="flex items-center gap-3">
-                                    <Truck className="h-5 w-5 text-green-500" />
+                                    <Car className="h-5 w-5 text-green-500" />
                                     <span className="text-sm font-medium">Odometer</span>
                                 </div>
                                 <span className="font-bold">{vehicle.odometer} km</span>

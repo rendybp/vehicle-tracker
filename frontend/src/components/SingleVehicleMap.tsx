@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Vehicle } from '../types';
-import { Truck, Clock, Gauge, Fuel, MapPin } from 'lucide-react';
+import { Car, Clock, Gauge, Fuel, MapPin } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 // Fix for default Leaflet icon not finding images in react-leaflet
@@ -31,14 +31,17 @@ const MapRecenter = ({ lat, lng }: { lat: number; lng: number }) => {
 export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
     // Create custom icon
     const createCustomIcon = (status: Vehicle['status']) => {
-        const colorClass =
-            status === 'ACTIVE' ? 'text-green-600' :
-                status === 'MAINTENANCE' ? 'text-orange-600' :
-                    'text-gray-600';
+        const statusClasses = {
+            ACTIVE: 'text-green-600 border-green-500',
+            MAINTENANCE: 'text-orange-600 border-orange-500',
+            INACTIVE: 'text-gray-600 border-gray-500' // Default / Inactive
+        };
+
+        const activeClass = statusClasses[status] || statusClasses['INACTIVE'];
 
         const iconMarkup = renderToStaticMarkup(
-            <div className={`bg-white p-1.5 rounded-full shadow-md border-2 border-white ${colorClass}`}>
-                <Truck size={24} fill="currentColor" className="opacity-90" />
+            <div className={`bg-white p-1.5 rounded-full shadow-md border-2 ${activeClass}`}>
+                <Car size={24} color="currentColor" className="opacity-90" />
             </div>
         );
 
@@ -98,7 +101,7 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
 
                                 <div className="bg-gray-50 p-2 rounded flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Truck className="h-4 w-4 text-green-500" />
+                                        <Car className="h-4 w-4 text-green-500" />
                                         <span className="text-xs font-medium text-gray-700">Odometer</span>
                                     </div>
                                     <span className="text-sm font-bold text-gray-900">{vehicle.odometer} km</span>

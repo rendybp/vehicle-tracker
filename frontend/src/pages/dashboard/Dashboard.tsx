@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, Activity, Wrench, AlertTriangle, type LucideIcon } from 'lucide-react';
+import { Car, Activity, Wrench, AlertTriangle, type LucideIcon } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { cn } from '../../lib/utils';
@@ -46,7 +46,7 @@ export const Dashboard = () => {
                 <StatsCard
                     label="Total Vehicles"
                     value={stats.total}
-                    icon={Truck}
+                    icon={Car}
                     className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                     onClick={() => navigate('/vehicles')}
                 />

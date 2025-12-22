@@ -1,6 +1,6 @@
 import { useState, type SVGProps } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Truck, Users, LogOut, Menu, X, MapPin, User, ChevronUp, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Car, Users, LogOut, Menu, X, MapPin, User, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../stores/authStore';
 import { authService } from '../../services/authService';
@@ -30,7 +30,7 @@ export const DashboardLayout = () => {
 
     const navItems = [
         { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', roles: ['USER', 'ADMIN'] },
-        { label: 'Vehicles', icon: Truck, href: '/vehicles', roles: ['USER', 'ADMIN'] },
+        { label: 'Vehicles', icon: Car, href: '/vehicles', roles: ['USER', 'ADMIN'] },
         // Admin Routes
         { label: 'Admin Dashboard', icon: ActivityIcon, href: '/admin/dashboard', roles: ['ADMIN'] },
         { label: 'User Management', icon: Users, href: '/admin/users', roles: ['ADMIN'] },

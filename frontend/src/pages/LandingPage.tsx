@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Shield, TrendingUp, Clock, Truck, Users, Activity, CheckCircle, LayoutDashboard, User, LogOut, ChevronDown } from 'lucide-react';
+import { MapPin, Shield, TrendingUp, Clock, Car, Users, Activity, CheckCircle, LayoutDashboard, User, LogOut, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { authService } from '../services/authService';
 import toast from 'react-hot-toast';
@@ -207,7 +207,7 @@ export const LandingPage = () => {
                     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                   >
                     <div className="relative flex items-center justify-center">
-                      <Truck className="h-6 w-6" />
+                      <Car className="h-6 w-6" />
                       {/* Pulse Effect */}
                       <span className="absolute -inset-2 rounded-full bg-brand-500/30 animate-ping"></span>
 
@@ -276,7 +276,7 @@ export const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { icon: Truck, label: 'Vehicles', value: '1,000+' },
+              { icon: Car, label: 'Vehicles', value: '1,000+' },
               { icon: Users, label: 'Active Users', value: '500+' },
               { icon: Activity, label: 'Uptime', value: '99.9%' },
               { icon: CheckCircle, label: 'Support', value: '24/7' },
