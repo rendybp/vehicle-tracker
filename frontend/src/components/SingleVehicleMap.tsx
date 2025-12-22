@@ -40,8 +40,8 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
         const activeClass = statusClasses[status] || statusClasses['INACTIVE'];
 
         const iconMarkup = renderToStaticMarkup(
-            <div className={`bg-white p-1.5 rounded-full shadow-md border-2 ${activeClass}`}>
-                <Car size={24} color="currentColor" className="opacity-90" />
+            <div className={`flex items-center justify-center w-9 h-9 bg-white rounded-full shadow-md border-3 ${activeClass}`}>
+                <Car size={27} color="currentColor" className="opacity-90" />
             </div>
         );
 
