@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Vehicle } from '../types';
-import { Car, Navigation } from 'lucide-react';
+import { Car, Navigation, Gauge, Fuel } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 
@@ -99,19 +99,21 @@ export const FleetMap = ({ vehicles }: FleetMapProps) => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                                    <div className="bg-gray-50 p-1.5 rounded">
-                                        <p className="text-gray-500 mb-0.5">Speed</p>
-                                        <p className="font-semibold text-gray-900">{vehicle.speed} km/h</p>
+                                    <div className="bg-gray-50 p-2 rounded flex flex-col items-center justify-center text-center">
+                                        <Gauge className="h-4 w-4 text-purple-500 mb-1" />
+                                        <span className="text-[10px] text-gray-500 uppercase">Speed</span>
+                                        <span className="font-semibold text-gray-900 text-sm">{vehicle.speed} km/h</span>
                                     </div>
-                                    <div className="bg-gray-50 p-1.5 rounded">
-                                        <p className="text-gray-500 mb-0.5">Fuel</p>
-                                        <p className="font-semibold text-gray-900">{vehicle.fuel_level}%</p>
+                                    <div className="bg-gray-50 p-2 rounded flex flex-col items-center justify-center text-center">
+                                        <Fuel className="h-4 w-4 text-blue-500 mb-1" />
+                                        <span className="text-[10px] text-gray-500 uppercase">Fuel</span>
+                                        <span className="font-semibold text-gray-900 text-sm">{vehicle.fuel_level}%</span>
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={() => navigate(`/vehicles/${vehicle.id}`)}
-                                    className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 rounded transition-colors"
+                                    className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 rounded transition-colors cursor-pointer"
                                 >
                                     <Navigation size={12} />
                                     View Details
