@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Car, Fuel, Gauge, Calendar, Clock, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Car, Fuel, Gauge, Calendar, Clock, Edit, Trash2, MapPin, Loader2 } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { StatusBadge } from './Dashboard';
@@ -8,6 +8,7 @@ import { useAuthStore } from '../../stores/authStore';
 import toast from 'react-hot-toast';
 import { DeleteConfirmationModal } from '../../components/DeleteConfirmationModal';
 import { SingleVehicleMap } from '../../components/SingleVehicleMap';
+import { useReverseGeocoding } from '../../hooks/useReverseGeocoding';
 
 export const VehicleDetail = () => {
     const { id } = useParams();
@@ -16,6 +17,8 @@ export const VehicleDetail = () => {
     const [vehicle, setVehicle] = useState<Vehicle | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const { address, loading, error } = useReverseGeocoding(vehicle?.latitude, vehicle?.longitude);
 
     useEffect(() => {
         const loadData = async () => {
@@ -85,7 +88,7 @@ export const VehicleDetail = () => {
             <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-6">
                     {/* Live Map */}
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1 h-133 flex flex-col">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1 h-140 flex flex-col">
                         <h2 className="text-lg font-semibold px-5 py-3">Live Location</h2>
                         <div className="flex-1 rounded-lg overflow-hidden relative">
                             <SingleVehicleMap vehicle={vehicle} />
@@ -94,6 +97,58 @@ export const VehicleDetail = () => {
                 </div>
 
                 <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <MapPin className="h-5 w-5 text-red-500" />
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Current Location</h2>
+                        </div>
+
+                        {loading ? (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Loading location...
+                            </div>
+                        ) : error ? (
+                            <p className="text-sm text-red-500">{error}</p>
+                        ) : address ? (
+                            <div className="space-y-2">
+                                {/* Alamat Utama */}
+                                <p className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed">
+                                    {address.road || 'Jalan tidak terdeteksi'}
+                                </p>
+
+                                {/* Detail Breakdown */}
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Desa/Kelurahan</span>
+                                        {address.village || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Kecamatan</span>
+                                        {address.city_district || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Kabupaten/Kota</span>
+                                        {address.regency || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Provinsi</span>
+                                        {address.state || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Kode Pos</span>
+                                        {address.postcode || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Negara</span>
+                                        {address.country || '-'}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">Koordinat tidak tersedia</p>
+                        )}
+                    </div>
                     {/* Stats */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
                         <h2 className="text-lg font-semibold mb-4">Vehicle Stats</h2>
