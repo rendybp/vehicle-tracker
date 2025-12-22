@@ -22,7 +22,7 @@ export const RegisterPage = () => {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<RegisterFormData>({
+    } = useForm({
         resolver: zodResolver(registerSchema),
     });
 
