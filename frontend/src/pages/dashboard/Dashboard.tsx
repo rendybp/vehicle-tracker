@@ -95,20 +95,23 @@ export const Dashboard = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            {vehicles.slice(0, 5).map(vehicle => (
-                                <tr
-                                    key={vehicle.id}
-                                    onClick={() => navigate(`/vehicles/${vehicle.id}`)}
-                                    className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                                >
-                                    <td className="py-3 font-medium text-gray-900 dark:text-gray-100">{vehicle.name}</td>
-                                    <td className="py-3">
-                                        <StatusBadge status={vehicle.status} />
-                                    </td>
-                                    <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.fuel_level}%</td>
-                                    <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.speed} km/h</td>
-                                </tr>
-                            ))}
+                            {[...vehicles]
+                                .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                                .slice(0, 5)
+                                .map(vehicle => (
+                                    <tr
+                                        key={vehicle.id}
+                                        onClick={() => navigate(`/vehicles/${vehicle.id}`)}
+                                        className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                    >
+                                        <td className="py-3 font-medium text-gray-900 dark:text-gray-100">{vehicle.name}</td>
+                                        <td className="py-3">
+                                            <StatusBadge status={vehicle.status} />
+                                        </td>
+                                        <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.fuel_level}%</td>
+                                        <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.speed} km/h</td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                     {vehicles.length === 0 && (
