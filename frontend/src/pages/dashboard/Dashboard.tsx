@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Activity, Wrench, AlertTriangle, type LucideIcon } from 'lucide-react';
+import { Car, Activity, Wrench, AlertTriangle, Eye, EyeOff, type LucideIcon } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { cn } from '../../lib/utils';
@@ -10,6 +10,7 @@ export const Dashboard = () => {
     const navigate = useNavigate();
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [hiddenStatuses, setHiddenStatuses] = useState<string[]>([]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -27,12 +28,22 @@ export const Dashboard = () => {
         loadData();
     }, []);
 
+    const toggleStatus = (status: string) => {
+        setHiddenStatuses(prev =>
+            prev.includes(status)
+                ? prev.filter(s => s !== status)
+                : [...prev, status]
+        );
+    };
+
     const stats = {
         total: vehicles.length,
         active: vehicles.filter(v => v.status === 'ACTIVE').length,
         maintenance: vehicles.filter(v => v.status === 'MAINTENANCE').length,
         inactive: vehicles.filter(v => v.status === 'INACTIVE').length,
     };
+
+    const filteredMapVehicles = vehicles.filter(v => !hiddenStatuses.includes(v.status));
 
     if (isLoading) {
         return <div className="p-8 text-center">Loading dashboard...</div>;
@@ -49,6 +60,8 @@ export const Dashboard = () => {
                     icon={Car}
                     className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                     onClick={() => navigate('/vehicles')}
+                    isVisible={hiddenStatuses.length === 0}
+                    onToggleVisibility={hiddenStatuses.length > 0 ? () => setHiddenStatuses([]) : undefined}
                 />
                 <StatsCard
                     label="Active"
@@ -56,6 +69,8 @@ export const Dashboard = () => {
                     icon={Activity}
                     className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
                     onClick={() => navigate('/vehicles?status=ACTIVE')}
+                    isVisible={!hiddenStatuses.includes('ACTIVE')}
+                    onToggleVisibility={() => toggleStatus('ACTIVE')}
                 />
                 <StatsCard
                     label="Maintenance"
@@ -63,6 +78,8 @@ export const Dashboard = () => {
                     icon={Wrench}
                     className="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
                     onClick={() => navigate('/vehicles?status=MAINTENANCE')}
+                    isVisible={!hiddenStatuses.includes('MAINTENANCE')}
+                    onToggleVisibility={() => toggleStatus('MAINTENANCE')}
                 />
                 <StatsCard
                     label="Inactive"
@@ -70,6 +87,8 @@ export const Dashboard = () => {
                     icon={AlertTriangle}
                     className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400"
                     onClick={() => navigate('/vehicles?status=INACTIVE')}
+                    isVisible={!hiddenStatuses.includes('INACTIVE')}
+                    onToggleVisibility={() => toggleStatus('INACTIVE')}
                 />
             </div>
 
@@ -77,7 +96,7 @@ export const Dashboard = () => {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
                 <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Live Fleet Map</h2>
                 <div className="w-full h-80 lg:h-96 rounded-lg overflow-hidden">
-                    <FleetMap vehicles={vehicles} />
+                    <FleetMap vehicles={filteredMapVehicles} />
                 </div>
             </div>
 
@@ -129,25 +148,52 @@ interface StatsCardProps {
     icon: LucideIcon;
     className?: string;
     onClick?: () => void;
+    isVisible?: boolean;
+    onToggleVisibility?: (e: React.MouseEvent) => void;
 }
 
-export const StatsCard = ({ label, value, icon: Icon, className, onClick }: StatsCardProps) => (
-    <div
-        onClick={onClick}
-        className={cn(
-            "bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 flex items-center gap-4 transition-transform hover:-translate-y-1",
-            onClick && "cursor-pointer hover:shadow-md active:scale-95 transition-all"
-        )}
-    >
-        <div className={cn("p-3 rounded-lg", className)}>
-            <Icon className="h-6 w-6" />
+export const StatsCard = ({
+    label,
+    value,
+    icon: Icon,
+    className,
+    onClick,
+    isVisible = true,
+    onToggleVisibility
+}: StatsCardProps) => {
+    const EyeIcon = isVisible ? Eye : EyeOff;
+
+    return (
+        <div
+            onClick={onClick}
+            className={cn(
+                "group relative bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 flex items-center gap-4 transition-transform hover:-translate-y-1",
+                onClick && "cursor-pointer hover:shadow-md active:scale-95 transition-all",
+                !isVisible && "opacity-60"
+            )}
+        >
+            {onToggleVisibility && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleVisibility(e);
+                    }}
+                    className="absolute top-3 right-3 p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                    title={isVisible ? "Hide from map" : "Show on map"}
+                >
+                    <EyeIcon size={16} />
+                </button>
+            )}
+            <div className={cn("p-3 rounded-lg", className)}>
+                <Icon className="h-6 w-6" />
+            </div>
+            <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{label}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+            </div>
         </div>
-        <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{label}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
-        </div>
-    </div>
-);
+    );
+};
 
 export const StatusBadge = ({ status }: { status: string }) => {
     const styles = {
