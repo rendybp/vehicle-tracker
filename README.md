@@ -14,14 +14,14 @@ Vehicle Tracker is a comprehensive vehicle tracking and management system design
 ## 🛠️ Tech Stack
 
 - **Backend**: Node.js, Express, Prisma (PostgreSQL), JWT, Swagger UI.
-- **Frontend**: React, Vite, TypeScript, TailwindCSS, Leaflet (Maps).
+- **Frontend**: React, Vite, TypeScript, TailwindCSS, Framer Motion, Leaflet (Maps).
 
 ## 📥 Cloning the Repository
 
 To get started, clone the repository to your local machine:
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/rendybp/vehicle-tracker.git
 cd vehicle-tracker
 ```
 
@@ -38,7 +38,7 @@ npm install
 
 #### Environment Configuration
 
-Create a `.env` file in the `backend` directory (copy from `.env.example` if available) and configure your database connection and secrets:
+Create a `.env` file in the `backend` directory (copy from `.env.example`) and configure your database connection and secrets:
 
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/vehicle_tracker?schema=public"
@@ -47,6 +47,8 @@ REFRESH_TOKEN_SECRET="your_refresh_token_secret"
 CLIENT_URL="http://localhost:5173" # Frontend URL
 PORT=5000
 ```
+
+You can generate secrets using: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 
 #### Database Setup & Seeding
 
@@ -71,8 +73,6 @@ Navigate to the frontend directory and install dependencies:
 cd ../frontend
 npm install
 ```
-
-Create a `.env` file in the `frontend` directory if required (usually Vite picks up env vars automatically, or check `.env.example`).
 
 ## 🏃‍♂️ Running the Application
 
