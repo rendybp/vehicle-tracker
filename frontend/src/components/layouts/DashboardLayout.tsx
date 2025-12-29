@@ -138,7 +138,7 @@ export const DashboardLayout = () => {
 
             {/* Mobile Sidebar */}
             <aside className={cn(
-                "fixed top-16 bottom-0 right-0 w-64 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-20 md:hidden transition-transform duration-300 transform flex flex-col",
+                "fixed top-16 bottom-0 right-0 w-64 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-2000 md:hidden transition-transform duration-300 transform flex flex-col",
                 isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
             )}>
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
