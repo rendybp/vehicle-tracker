@@ -119,7 +119,7 @@ export const DashboardLayout = () => {
             </aside>
 
             {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-20 px-4 h-16 flex items-center justify-between">
+            <div className="md:hidden fixed top-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-2000 px-4 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <MapPin className="h-6 w-6 text-brand-600" />
                     <Link to="/">
