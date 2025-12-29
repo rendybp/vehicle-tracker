@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Vehicle } from '../types';
-import { Car, Clock, Gauge, Fuel, MapPin } from 'lucide-react';
+import { Car, Clock, Gauge, Fuel, MapPin, LocateFixed } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 // Fix for default Leaflet icon not finding images in react-leaflet
@@ -17,12 +17,62 @@ interface SingleVehicleMapProps {
     vehicle: Vehicle;
 }
 
+const RestoreViewControl = ({ lat, lng }: { lat: number; lng: number }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        const RestoreControl = L.Control.extend({
+            options: {
+                position: 'topright' // Posisi tombol
+            },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+                // Styling sama persis dengan yang Anda kirim sebelumnya
+                container.style.backgroundColor = 'white';
+                container.style.width = '30px';
+                container.style.height = '30px';
+                container.style.cursor = 'pointer';
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.title = 'Center Map on Vehicle';
+
+                // Menggunakan icon LocateFixed (Target) agar lebih sesuai konteks single view
+                const icon = renderToStaticMarkup(<LocateFixed size={18} className="text-gray-700" />);
+                container.innerHTML = icon;
+
+                container.onclick = function (e) {
+                    L.DomEvent.stopPropagation(e);
+                    // Logika inti: Kembalikan view ke posisi vehicle
+                    // flyTo memberikan efek animasi halus saat kembali
+                    map.flyTo([lat, lng], 18, {
+                        animate: true,
+                        duration: 1.5
+                    });
+                }
+
+                return container;
+            }
+        });
+
+        const control = new RestoreControl();
+        map.addControl(control);
+
+        return () => {
+            map.removeControl(control);
+        };
+    }, [map, lat, lng]); // Re-render control jika koordinat berubah
+
+    return null;
+};
+
 // Component to recenter map when vehicle coordinates change
 const MapRecenter = ({ lat, lng }: { lat: number; lng: number }) => {
     const map = useMap();
 
     useEffect(() => {
-        map.setView([lat, lng], 15);
+        map.setView([lat, lng], 18);
     }, [lat, lng, map]);
 
     return null;
@@ -58,7 +108,7 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
         <div className="w-full h-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 z-0">
             <MapContainer
                 center={[vehicle.latitude, vehicle.longitude]}
-                zoom={15}
+                zoom={20}
                 style={{ height: '100%', width: '100%' }}
                 scrollWheelZoom={true}
             >
@@ -68,6 +118,7 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
                 />
 
                 <MapRecenter lat={vehicle.latitude} lng={vehicle.longitude} />
+                <RestoreViewControl lat={vehicle.latitude} lng={vehicle.longitude} />
 
                 <Marker
                     position={[vehicle.latitude, vehicle.longitude]}
@@ -78,8 +129,8 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
                             <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                                 <h3 className="font-bold text-gray-900 text-base">{vehicle.name}</h3>
                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                        vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
-                                            'bg-red-100 text-red-700'
+                                    vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
+                                        'bg-red-100 text-red-700'
                                     }`}>
                                     {vehicle.status}
                                 </span>

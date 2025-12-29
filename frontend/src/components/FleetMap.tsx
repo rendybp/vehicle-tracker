@@ -108,7 +108,7 @@ const VehicleMarker = ({ vehicle }: { vehicle: Vehicle }) => {
 
     const handleMarkerClick = () => {
         // Current zoom or target zoom
-        const targetZoom = 16;
+        const targetZoom = 18;
 
         // Project the marker's location to pixel coordinates at the target zoom
         const targetPoint = map.project([vehicle.latitude, vehicle.longitude], targetZoom);
