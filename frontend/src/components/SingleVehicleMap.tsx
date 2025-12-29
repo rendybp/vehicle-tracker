@@ -34,7 +34,7 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
         const statusClasses = {
             ACTIVE: 'text-green-600 border-green-500',
             MAINTENANCE: 'text-orange-600 border-orange-500',
-            INACTIVE: 'text-gray-600 border-gray-500' // Default / Inactive
+            INACTIVE: 'text-red-600 border-red-500' // Default / Inactive
         };
 
         const activeClass = statusClasses[status] || statusClasses['INACTIVE'];
@@ -79,7 +79,7 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
                                 <h3 className="font-bold text-gray-900 text-base">{vehicle.name}</h3>
                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
                                         vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
-                                            'bg-gray-100 text-gray-700'
+                                            'bg-red-100 text-red-700'
                                     }`}>
                                     {vehicle.status}
                                 </span>
