@@ -1,9 +1,9 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Vehicle } from '../types';
-import { Car, Navigation, Gauge, Fuel } from 'lucide-react';
+import { Car, Navigation, Gauge, Fuel, Maximize } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,15 +21,59 @@ interface FleetMapProps {
 }
 
 // Component to update map bounds based on vehicles
-const MapUpdater = ({ vehicles }: { vehicles: Vehicle[] }) => {
+// Also exposes a way to reset the view
+const MapController = ({ vehicles }: { vehicles: Vehicle[] }) => {
     const map = useMap();
 
-    useEffect(() => {
+    // Store the initial bounds or calculate them
+    const fitAll = useCallback(() => {
         if (vehicles.length > 0) {
             const bounds = L.latLngBounds(vehicles.map(v => [v.latitude, v.longitude]));
             map.fitBounds(bounds, { padding: [50, 50] });
         }
     }, [vehicles, map]);
+
+    useEffect(() => {
+        fitAll();
+    }, [fitAll]);
+
+    // Add a custom control for "Restore View"
+    useEffect(() => {
+        const RestoreControl = L.Control.extend({
+            options: {
+                position: 'topright'
+            },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                container.style.backgroundColor = 'white';
+                container.style.width = '30px';
+                container.style.height = '30px';
+                container.style.cursor = 'pointer';
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.title = 'Restore View';
+
+                const icon = renderToStaticMarkup(<Maximize size={18} className="text-gray-700" />);
+                container.innerHTML = icon;
+
+                container.onclick = function (e) {
+                    L.DomEvent.stopPropagation(e);
+                    map.closePopup();
+                    fitAll();
+                }
+
+                return container;
+            }
+        });
+
+        const control = new RestoreControl();
+        map.addControl(control);
+
+        return () => {
+            map.removeControl(control);
+        };
+    }, [map, fitAll]);
 
     return null;
 };
@@ -63,8 +107,21 @@ const VehicleMarker = ({ vehicle }: { vehicle: Vehicle }) => {
     const map = useMap();
 
     const handleMarkerClick = () => {
-        map.flyTo([vehicle.latitude, vehicle.longitude], 16, {
-            duration: 1.5 // Animation duration
+        // Current zoom or target zoom
+        const targetZoom = 16;
+
+        // Project the marker's location to pixel coordinates at the target zoom
+        const targetPoint = map.project([vehicle.latitude, vehicle.longitude], targetZoom);
+
+        // Shift the center point up by 150 pixels (so the marker is lower)
+        // to give space for the popup
+        const newCenterPoint = new L.Point(targetPoint.x, targetPoint.y - 90);
+
+        // Unproject back to LatLng
+        const newCenter = map.unproject(newCenterPoint, targetZoom);
+
+        map.flyTo(newCenter, targetZoom, {
+            duration: 1.0
         });
     };
 
@@ -132,7 +189,7 @@ export const FleetMap = ({ vehicles }: FleetMapProps) => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                <MapUpdater vehicles={vehicles} />
+                <MapController vehicles={vehicles} />
 
                 {vehicles.map((vehicle) => (
                     <VehicleMarker key={vehicle.id} vehicle={vehicle} />
