@@ -12,6 +12,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
 import { useAuthSync } from './hooks/useAuthSync';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
 
@@ -48,6 +49,7 @@ function App() {
             <Route path="/admin/users" element={<UserManagement />} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   )

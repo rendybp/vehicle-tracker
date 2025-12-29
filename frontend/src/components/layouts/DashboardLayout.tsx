@@ -1,6 +1,6 @@
 import { useState, type SVGProps } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Truck, Users, LogOut, Menu, X, MapPin, User, ChevronUp, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Car, Users, LogOut, Menu, X, MapPin, User, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../stores/authStore';
 import { authService } from '../../services/authService';
@@ -30,7 +30,7 @@ export const DashboardLayout = () => {
 
     const navItems = [
         { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', roles: ['USER', 'ADMIN'] },
-        { label: 'Vehicles', icon: Truck, href: '/vehicles', roles: ['USER', 'ADMIN'] },
+        { label: 'Vehicles', icon: Car, href: '/vehicles', roles: ['USER', 'ADMIN'] },
         // Admin Routes
         { label: 'Admin Dashboard', icon: ActivityIcon, href: '/admin/dashboard', roles: ['ADMIN'] },
         { label: 'User Management', icon: Users, href: '/admin/users', roles: ['ADMIN'] },
@@ -119,7 +119,7 @@ export const DashboardLayout = () => {
             </aside>
 
             {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-20 px-4 h-16 flex items-center justify-between">
+            <div className="md:hidden fixed top-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-2000 px-4 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <MapPin className="h-6 w-6 text-brand-600" />
                     <Link to="/">
@@ -138,7 +138,7 @@ export const DashboardLayout = () => {
 
             {/* Mobile Sidebar */}
             <aside className={cn(
-                "fixed top-16 bottom-0 right-0 w-64 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-20 md:hidden transition-transform duration-300 transform flex flex-col",
+                "fixed top-16 bottom-0 right-0 w-64 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-2000 md:hidden transition-transform duration-300 transform flex flex-col",
                 isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
             )}>
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

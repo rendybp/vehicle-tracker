@@ -9,7 +9,7 @@ export interface User {
     created_at: string;
 }
 
-export interface UserResponse extends User { }
+export type UserResponse = User;
 
 export interface Vehicle {
     id: number;
@@ -24,7 +24,7 @@ export interface Vehicle {
     created_at: string;
 }
 
-export interface VehicleResponse extends Vehicle { }
+export type VehicleResponse = Vehicle;
 
 export interface VehicleWithLocation extends Vehicle {
     position: [number, number];

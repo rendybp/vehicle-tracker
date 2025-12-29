@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Truck, Fuel, Gauge, MapPin, Calendar, Clock, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Car, Fuel, Gauge, Calendar, Clock, Edit, Trash2, MapPin, Loader2 } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { StatusBadge } from './Dashboard';
 import { useAuthStore } from '../../stores/authStore';
 import toast from 'react-hot-toast';
 import { DeleteConfirmationModal } from '../../components/DeleteConfirmationModal';
+import { SingleVehicleMap } from '../../components/SingleVehicleMap';
+import { useReverseGeocoding } from '../../hooks/useReverseGeocoding';
 
 export const VehicleDetail = () => {
     const { id } = useParams();
@@ -15,6 +17,8 @@ export const VehicleDetail = () => {
     const [vehicle, setVehicle] = useState<Vehicle | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const { address, loading, error } = useReverseGeocoding(vehicle?.latitude, vehicle?.longitude);
 
     useEffect(() => {
         const loadData = async () => {
@@ -50,12 +54,12 @@ export const VehicleDetail = () => {
     if (!vehicle) return <div className="p-8">Vehicle not found</div>;
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
-            <button 
+        <div className="max-w-6xl mx-auto space-y-6">
+            <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
             >
-                <ArrowLeft className="h-4 w-4" /> Back to Vehicles
+                <ArrowLeft className="h-4 w-4" /> Back
             </button>
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -71,7 +75,7 @@ export const VehicleDetail = () => {
                         <Link to={`/vehicles/${vehicle.id}/edit`} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-all">
                             <Edit className="h-4 w-4" /> Edit
                         </Link>
-                        <button 
+                        <button
                             onClick={() => setIsDeleteModalOpen(true)}
                             className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center gap-2 transition-all cursor-pointer"
                         >
@@ -83,20 +87,68 @@ export const VehicleDetail = () => {
 
             <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-6">
-                    {/* Live Map Placeholder */}
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 h-96 flex flex-col">
-                        <h2 className="text-lg font-semibold mb-4">Live Location</h2>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 flex-col gap-2">
-                             <MapPin className="h-10 w-10 opacity-50" />
-                             <p>Map Component Placeholder</p>
-                             <div className="text-xs font-mono bg-gray-200 dark:bg-gray-900 px-2 py-1 rounded">
-                                 Lat: {vehicle.latitude}, Lng: {vehicle.longitude}
-                             </div>
+                    {/* Live Map */}
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1 h-140 flex flex-col">
+                        <h2 className="text-lg font-semibold px-5 py-3">Live Location</h2>
+                        <div className="flex-1 rounded-lg overflow-hidden relative">
+                            <SingleVehicleMap vehicle={vehicle} />
                         </div>
                     </div>
                 </div>
 
                 <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <MapPin className="h-5 w-5 text-red-500" />
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Current Location</h2>
+                        </div>
+
+                        {loading ? (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Loading location...
+                            </div>
+                        ) : error ? (
+                            <p className="text-sm text-red-500">{error}</p>
+                        ) : address ? (
+                            <div className="space-y-2">
+                                {/* Alamat Utama */}
+                                <p className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed">
+                                    {address.road || 'Jalan tidak terdeteksi'}
+                                </p>
+
+                                {/* Detail Breakdown */}
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Desa/Kelurahan</span>
+                                        {address.village || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Kecamatan</span>
+                                        {address.city_district || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Kabupaten/Kota</span>
+                                        {address.regency || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Provinsi</span>
+                                        {address.state || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Kode Pos</span>
+                                        {address.postcode || '-'}
+                                    </div>
+                                    <div>
+                                        <span className="block font-bold text-gray-400 uppercase text-[10px]">Negara</span>
+                                        {address.country || '-'}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">Koordinat tidak tersedia</p>
+                        )}
+                    </div>
                     {/* Stats */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
                         <h2 className="text-lg font-semibold mb-4">Vehicle Stats</h2>
@@ -108,16 +160,16 @@ export const VehicleDetail = () => {
                                 </div>
                                 <span className="font-bold">{vehicle.fuel_level}%</span>
                             </div>
-                             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                                 <div className="flex items-center gap-3">
                                     <Gauge className="h-5 w-5 text-purple-500" />
                                     <span className="text-sm font-medium">Speed</span>
                                 </div>
                                 <span className="font-bold">{vehicle.speed} km/h</span>
                             </div>
-                             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                                 <div className="flex items-center gap-3">
-                                    <Truck className="h-5 w-5 text-green-500" />
+                                    <Car className="h-5 w-5 text-green-500" />
                                     <span className="text-sm font-medium">Odometer</span>
                                 </div>
                                 <span className="font-bold">{vehicle.odometer} km</span>
@@ -126,8 +178,8 @@ export const VehicleDetail = () => {
                     </div>
 
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                         <h2 className="text-lg font-semibold mb-4">Metadata</h2>
-                         <div className="space-y-3 text-sm">
+                        <h2 className="text-lg font-semibold mb-4">Metadata</h2>
+                        <div className="space-y-3 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-gray-500 flex items-center gap-2"><Calendar className="h-3 w-3" /> Created</span>
                                 <span>{new Date(vehicle.created_at).toLocaleDateString()}</span>
@@ -136,7 +188,7 @@ export const VehicleDetail = () => {
                                 <span className="text-gray-500 flex items-center gap-2"><Clock className="h-3 w-3" /> Last Update</span>
                                 <span>{new Date(vehicle.updated_at).toLocaleString()}</span>
                             </div>
-                         </div>
+                        </div>
                     </div>
                 </div>
             </div>
