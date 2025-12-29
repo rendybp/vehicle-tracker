@@ -74,8 +74,8 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
                     icon={createCustomIcon(vehicle.status)}
                 >
                     <Popup className="custom-popup">
-                        <div className="min-w-60 p-2">
-                            <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+                        <div className="max-w-50 p-2">
+                            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                                 <h3 className="font-bold text-gray-900 text-base">{vehicle.name}</h3>
                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
                                         vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
@@ -85,7 +85,7 @@ export const SingleVehicleMap = ({ vehicle }: SingleVehicleMapProps) => {
                                 </span>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-1">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="bg-gray-50 p-2 rounded flex flex-col items-center justify-center text-center">
                                         <Gauge className="h-4 w-4 text-purple-500 mb-1" />

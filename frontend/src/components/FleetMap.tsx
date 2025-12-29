@@ -135,7 +135,7 @@ const VehicleMarker = ({ vehicle }: { vehicle: Vehicle }) => {
             }}
         >
             <Popup className="custom-popup">
-                <div className="min-w-[200px] p-1">
+                <div className="max-w-50 p-1">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="font-bold text-gray-900 text-sm">{vehicle.name}</h3>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
