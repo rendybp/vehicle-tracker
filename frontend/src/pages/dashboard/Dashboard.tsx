@@ -178,10 +178,10 @@ export const StatsCard = ({
                         e.stopPropagation();
                         onToggleVisibility(e);
                     }}
-                    className="absolute top-3 right-3 p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                    className="absolute top-3 right-3 p-2 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer"
                     title={isVisible ? "Hide from map" : "Show on map"}
                 >
-                    <EyeIcon size={16} />
+                    <EyeIcon size={20} />
                 </button>
             )}
             <div className={cn("p-3 rounded-lg", className)}>
