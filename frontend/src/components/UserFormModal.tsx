@@ -20,12 +20,13 @@ interface UserFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSave: (data: any) => Promise<void>; 
+    onSave: (data: any) => Promise<void>;
     initialData?: User | null;
     isLoading?: boolean;
+    isProfile?: boolean;
 }
 
-export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading }: UserFormModalProps) => {
+export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading, isProfile = false }: UserFormModalProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -43,7 +44,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
             // Reset state only if needed to avoid redundant updates
             if (showPassword) setShowPassword(false);
             if (showConfirmPassword) setShowConfirmPassword(false);
-            
+
             if (initialData) {
                 reset({
                     email: initialData.email,
@@ -74,6 +75,10 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
             delete submitData.password;
             delete submitData.confirmPassword;
         }
+        if (isProfile) {
+            delete submitData.role;
+            delete submitData.is_active;
+        }
         onSave(submitData);
     };
 
@@ -97,7 +102,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                     >
                         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                {initialData ? 'Edit User' : 'Add New User'}
+                                {isProfile ? 'Edit Profile' : (initialData ? 'Edit User' : 'Add New User')}
                             </h2>
                             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
                                 <X className="h-5 w-5" />
@@ -119,7 +124,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                         placeholder="John Doe"
                                     />
                                 </div>
-                                {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.name.message}</p>}
+                                {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.name.message}</p>}
                             </div>
 
                             {/* Email */}
@@ -136,7 +141,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                         placeholder="john@example.com"
                                     />
                                 </div>
-                                {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.email.message}</p>}
+                                {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.email.message}</p>}
                             </div>
 
                             {/* Password Fields */}
@@ -146,7 +151,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                         Leave password blank to keep current password
                                     </div>
                                 )}
-                                
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {/* Password */}
                                     <div>
@@ -169,7 +174,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                             </button>
                                         </div>
-                                        {errors.password && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.password.message}</p>}
+                                        {errors.password && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.password.message}</p>}
                                     </div>
 
                                     {/* Confirm Password */}
@@ -193,45 +198,47 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                             </button>
                                         </div>
-                                        {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.confirmPassword.message}</p>}
+                                        {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.confirmPassword.message}</p>}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Role
-                                    </label>
-                                    <div className="relative">
-                                        <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                        <select
-                                            {...register('role')}
-                                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
-                                        >
-                                            <option value="USER">User</option>
-                                            <option value="ADMIN">Admin</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {initialData && (
+                            {!isProfile && (
+                                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Status
+                                            Role
                                         </label>
                                         <div className="relative">
+                                            <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                             <select
-                                                {...register('is_active')}
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
+                                                {...register('role')}
+                                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
                                             >
-                                                <option value="true">Active</option>
-                                                <option value="false">Inactive</option>
+                                                <option value="USER">User</option>
+                                                <option value="ADMIN">Admin</option>
                                             </select>
                                         </div>
                                     </div>
-                                )}
-                            </div>
+
+                                    {initialData && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Status
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    {...register('is_active')}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
+                                                >
+                                                    <option value="true">Active</option>
+                                                    <option value="false">Inactive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="pt-4 flex justify-end gap-3">
                                 <button
@@ -248,7 +255,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading 
                                 >
                                     {isLoading ? 'Saving...' : (
                                         <>
-                                            <Save className="h-4 w-4" /> Save User
+                                            <Save className="h-4 w-4" /> Save
                                         </>
                                     )}
                                 </button>

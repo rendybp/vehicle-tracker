@@ -83,7 +83,7 @@ export const DashboardLayout = () => {
                                     className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 origin-bottom"
                                 >
                                     <Link 
-                                        to="/dashboard/profile" 
+                                        to="/profile" 
                                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-brand-600 transition-colors"
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >
@@ -185,7 +185,7 @@ export const DashboardLayout = () => {
                                 >
                                     <div className="mt-2 space-y-1 p-2 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
                                         <Link 
-                                            to="/dashboard/profile" 
+                                            to="/profile" 
                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm hover:text-brand-600 transition-all rounded-lg"
                                             onClick={() => {
                                                 setIsMobileUserMenuOpen(false);

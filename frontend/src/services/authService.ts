@@ -29,4 +29,9 @@ export const authService = {
         const response = await api.get<ApiResponse<User>>("/api/auth/me");
         return response.data;
     },
+
+    updateProfile: async (data: Partial<User> & { password?: string }) => {
+        const response = await api.patch<ApiResponse<User>>("/api/auth/me", data);
+        return response.data;
+    },
 };
