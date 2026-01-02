@@ -17,10 +17,12 @@ import { DashboardLayout } from './components/layouts/DashboardLayout';
 import { useAuthSync } from './hooks/useAuthSync';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { Profile } from './pages/dashboard/Profile';
+import { useScrollToTop } from './hooks/useScrollToTop';
 
 function App() {
 
   useAuthSync();
+  useScrollToTop();
 
   return (
     <>
