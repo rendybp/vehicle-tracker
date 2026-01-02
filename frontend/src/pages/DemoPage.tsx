@@ -1,11 +1,11 @@
-import { useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useCallback, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Ensure CSS is imported
-import { Car, Gauge, Fuel, AlertCircle, Maximize } from 'lucide-react';
+import { Car, Gauge, Fuel, AlertCircle, Maximize, X, Info } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 // Fix for default Leaflet icon
@@ -166,6 +166,8 @@ const VehicleMarker = ({ vehicle }: { vehicle: typeof dummyVehicles[number] }) =
 };
 
 export const DemoPage = () => {
+    const [isInfoOpen, setIsInfoOpen] = useState(false);
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col">
             <Navbar />
@@ -192,19 +194,45 @@ export const DemoPage = () => {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="grow bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-800 relative z-0 h-[600px]"
                 >
-                    {/* Map Info Overlay */}
-                    <div className="absolute top-4 left-12 z-2000 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 max-w-xs">
-                        <div className="flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-brand-600 mt-0.5" />
-                            <div>
-                                <h3 className="font-bold text-sm">Demo Mode</h3>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Click on the vehicle markers to view live telemetry data.
-                                    This is a simulation using static data.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Map Info Overlay - Toggleable */}
+                    <AnimatePresence>
+                        {isInfoOpen ? (
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="absolute top-4 left-14 z-2000 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 max-w-[calc(100vw-10rem)] sm:max-w-xs"
+                            >
+                                <button 
+                                    onClick={() => setIsInfoOpen(false)}
+                                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                                >
+                                    <X size={16} />
+                                </button>
+                                <div className="flex items-start gap-3 mt-1">
+                                    <AlertCircle className="w-5 h-5 text-brand-600 mt-0.5 shrink-0" />
+                                    <div>
+                                        <h3 className="font-bold text-sm">Demo Mode</h3>
+                                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                            Click on the vehicle markers to view live telemetry data.
+                                            This is a simulation using static data.
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                onClick={() => setIsInfoOpen(true)}
+                                className="absolute top-4 left-14 z-2000 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-2.5 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 text-brand-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                                title="Show Info"
+                            >
+                                <Info size={20} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
 
                     <MapContainer
                         center={[-2.5489, 118.0149]} // Indonesia Center
