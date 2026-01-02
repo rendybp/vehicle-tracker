@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { CheckCircle, Shield, TrendingUp, Cpu, Globe, Smartphone } from 'lucide-react';
@@ -92,9 +93,9 @@ export const ProductPage = () => {
                         <p className="opacity-90 mb-8 text-lg">
                             Join the revolution in fleet management. Scalable, secure, and simple to use.
                         </p>
-                        <button className="bg-white text-brand-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-lg">
-                            Get Started Now
-                        </button>
+                        <Link to="/contact" className="bg-white text-brand-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-lg">
+                            Contact Us Now
+                        </Link>
                     </div>
                     {/* Decorative Background */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>

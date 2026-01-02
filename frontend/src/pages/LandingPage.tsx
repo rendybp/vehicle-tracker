@@ -95,7 +95,7 @@ export const LandingPage = () => {
                     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                   >
                     <div className="relative flex items-center justify-center">
-                      <Car className="h-6 w-6" />
+                      <Car className="h-8 w-8" />
                       {/* Pulse Effect */}
                       <span className="absolute -inset-2 rounded-full bg-brand-500/30 animate-ping"></span>
 

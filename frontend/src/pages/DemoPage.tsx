@@ -54,7 +54,7 @@ const MapController = () => {
 
     const fitAll = useCallback(() => {
         const bounds = L.latLngBounds(dummyVehicles.map(v => [v.latitude, v.longitude]));
-        map.fitBounds(bounds, { padding: [50, 50] });
+        map.fitBounds(bounds, { padding: [200, 200] });
     }, [map]);
 
     useEffect(() => {
