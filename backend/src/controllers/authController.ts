@@ -9,7 +9,7 @@ const generateAccessToken = (userId: number, email: string, role: string) => {
   if (!accessTokenSecret) {
     throw new Error("ACCESS_TOKEN_SECRET not configured");
   }
-  
+
   return jwt.sign(
     { id: userId, email, role },
     accessTokenSecret,
@@ -23,7 +23,7 @@ const generateRefreshToken = (userId: number, email: string, role: string) => {
   if (!refreshTokenSecret) {
     throw new Error("REFRESH_TOKEN_SECRET not configured");
   }
-  
+
   return jwt.sign(
     { id: userId, email, role },
     refreshTokenSecret,
@@ -45,11 +45,13 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Password policy: Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
-    const passwordPolicyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const passwordPolicyRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordPolicyRegex.test(password)) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
+        message:
+          "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
       });
     }
 
@@ -223,7 +225,10 @@ export const refresh = async (req: Request, res: Response) => {
     }
 
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, refreshTokenSecret) as unknown as jwt.JwtPayload & {
+    const decoded = jwt.verify(
+      refreshToken,
+      refreshTokenSecret
+    ) as unknown as jwt.JwtPayload & {
       id: number;
       email: string;
       role: string;
@@ -265,7 +270,7 @@ export const refresh = async (req: Request, res: Response) => {
         message: "Refresh token expired",
       });
     }
-    
+
     res.status(403).json({
       success: false,
       message: "Invalid refresh token",
@@ -350,6 +355,88 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error fetching user",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Update user profile
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
+    const { email, name, password } = req.body;
+    const userId = req.user.id;
+
+    // Build update data
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+
+    // Handle password update
+    if (password) {
+      // Password policy regex (same as register)
+      const passwordPolicyRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      if (!passwordPolicyRegex.test(password)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
+        });
+      }
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    // Handle email update
+    if (email) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already in use",
+        });
+      }
+      updateData.email = email;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields to update",
+      });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating profile",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

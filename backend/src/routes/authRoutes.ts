@@ -5,6 +5,7 @@ import {
   logout,
   refresh,
   getCurrentUser,
+  updateProfile,
 } from "../controllers/authController";
 import { verifyToken } from "../middlewares/authMiddleware";
 
@@ -89,6 +90,22 @@ const router = Router();
  *           type: string
  *           format: password
  *           example: Password123#
+ *
+ *     UpdateProfileRequest:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: newemail@example.com
+ *         name:
+ *           type: string
+ *           example: New Name
+ *         password:
+ *           type: string
+ *           format: password
+ *           minLength: 8
+ *           example: NewPassword123!
  *     
  *     AuthResponse:
  *       type: object
@@ -351,5 +368,54 @@ router.post("/refresh", refresh);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/me", verifyToken, getCurrentUser);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   patch:
+ *     summary: Update current user profile
+ *     description: Update specific fields of the authenticated user's profile (name, email, password)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateProfileRequest'
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         description: Bad request - Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       409:
+ *         description: Conflict - Email already in use
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.patch("/me", verifyToken, updateProfile);
 
 export default router;

@@ -13,6 +13,7 @@ import { PublicRoute } from './components/PublicRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
 import { useAuthSync } from './hooks/useAuthSync';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { Profile } from './pages/dashboard/Profile';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/vehicles" element={<VehicleList />} />
             <Route path="/vehicles/:id" element={<VehicleDetail />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
 

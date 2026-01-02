@@ -1,4 +1,4 @@
-import { useState, type SVGProps } from 'react';
+import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { LayoutDashboard, Car, Users, LogOut, Menu, X, MapPin, User, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,7 +32,6 @@ export const DashboardLayout = () => {
         { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', roles: ['USER', 'ADMIN'] },
         { label: 'Vehicles', icon: Car, href: '/vehicles', roles: ['USER', 'ADMIN'] },
         // Admin Routes
-        { label: 'Admin Dashboard', icon: ActivityIcon, href: '/admin/dashboard', roles: ['ADMIN'] },
         { label: 'User Management', icon: Users, href: '/admin/users', roles: ['ADMIN'] },
     ];
 
@@ -70,7 +69,7 @@ export const DashboardLayout = () => {
                 </nav>
 
                 <div className="p-4 border-t border-gray-200 dark:border-gray-800 relative">
-                    {/* User Menu Dropup */}
+                    {/* User Menu Drop-up */}
                     <AnimatePresence>
                         {isUserMenuOpen && (
                             <>
@@ -83,7 +82,7 @@ export const DashboardLayout = () => {
                                     className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 origin-bottom"
                                 >
                                     <Link 
-                                        to="/dashboard/profile" 
+                                        to="/profile" 
                                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-brand-600 transition-colors"
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >
@@ -185,7 +184,7 @@ export const DashboardLayout = () => {
                                 >
                                     <div className="mt-2 space-y-1 p-2 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
                                         <Link 
-                                            to="/dashboard/profile" 
+                                            to="/profile" 
                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm hover:text-brand-600 transition-all rounded-lg"
                                             onClick={() => {
                                                 setIsMobileUserMenuOpen(false);
@@ -219,23 +218,3 @@ export const DashboardLayout = () => {
         </div>
     );
 };
-
-// Start Icon for Admin Dashboard
-function ActivityIcon(props: SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        </svg>
-    )
-}
