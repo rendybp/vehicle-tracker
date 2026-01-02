@@ -1,4 +1,4 @@
-import { useState, type SVGProps } from 'react';
+import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { LayoutDashboard, Car, Users, LogOut, Menu, X, MapPin, User, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,7 +32,6 @@ export const DashboardLayout = () => {
         { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', roles: ['USER', 'ADMIN'] },
         { label: 'Vehicles', icon: Car, href: '/vehicles', roles: ['USER', 'ADMIN'] },
         // Admin Routes
-        { label: 'Admin Dashboard', icon: ActivityIcon, href: '/admin/dashboard', roles: ['ADMIN'] },
         { label: 'User Management', icon: Users, href: '/admin/users', roles: ['ADMIN'] },
     ];
 
@@ -70,7 +69,7 @@ export const DashboardLayout = () => {
                 </nav>
 
                 <div className="p-4 border-t border-gray-200 dark:border-gray-800 relative">
-                    {/* User Menu Dropup */}
+                    {/* User Menu Drop-up */}
                     <AnimatePresence>
                         {isUserMenuOpen && (
                             <>
@@ -219,23 +218,3 @@ export const DashboardLayout = () => {
         </div>
     );
 };
-
-// Start Icon for Admin Dashboard
-function ActivityIcon(props: SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        </svg>
-    )
-}
