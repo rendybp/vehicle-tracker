@@ -1,6 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { LandingPage } from './pages/LandingPage';
+import { ProductPage } from './pages/ProductPage';
+import { DemoPage } from './pages/DemoPage';
+import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { Dashboard } from './pages/dashboard/Dashboard';
@@ -25,6 +28,9 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/product" element={<ProductPage />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/contact" element={<ContactPage />} />
 
         {/* Check Authentication for Public Routes */}
         <Route element={<PublicRoute />}>
