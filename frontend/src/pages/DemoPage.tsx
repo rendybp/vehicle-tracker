@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Ensure CSS is imported
-import { Car, Gauge, Fuel, AlertCircle } from 'lucide-react';
+import { Car, Gauge, Fuel, AlertCircle, Maximize } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 // Fix for default Leaflet icon
@@ -48,16 +48,121 @@ const createCustomIcon = (status: string) => {
     });
 };
 
-// Map Controller to fit bounds
+// Map Controller to fit bounds and add restore control
 const MapController = () => {
     const map = useMap();
 
-    useEffect(() => {
+    const fitAll = useCallback(() => {
         const bounds = L.latLngBounds(dummyVehicles.map(v => [v.latitude, v.longitude]));
         map.fitBounds(bounds, { padding: [50, 50] });
     }, [map]);
 
+    useEffect(() => {
+        fitAll();
+    }, [fitAll]);
+
+    // Add a custom control for "Restore View"
+    useEffect(() => {
+        const RestoreControl = L.Control.extend({
+            options: {
+                position: 'topright'
+            },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                container.style.backgroundColor = 'white';
+                container.style.width = '30px';
+                container.style.height = '30px';
+                container.style.cursor = 'pointer';
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.title = 'Restore View';
+
+                const icon = renderToStaticMarkup(<Maximize size={18} className="text-gray-700" />);
+                container.innerHTML = icon;
+
+                container.onclick = function (e) {
+                    L.DomEvent.stopPropagation(e);
+                    map.closePopup();
+                    fitAll();
+                }
+
+                return container;
+            }
+        });
+
+        const control = new RestoreControl();
+        map.addControl(control);
+
+        return () => {
+            map.removeControl(control);
+        };
+    }, [map, fitAll]);
+
     return null;
+};
+
+// Vehicle Marker component with zoom functionality
+const VehicleMarker = ({ vehicle }: { vehicle: typeof dummyVehicles[number] }) => {
+    const map = useMap();
+
+    const handleMarkerClick = () => {
+        // Current zoom or target zoom
+        const targetZoom = 18;
+
+        // Project the marker's location to pixel coordinates at the target zoom
+        const targetPoint = map.project([vehicle.latitude, vehicle.longitude], targetZoom);
+
+        // Shift the center point up by 150 pixels (so the marker is lower)
+        // to give space for the popup
+        const newCenterPoint = new L.Point(targetPoint.x, targetPoint.y - 90);
+
+        // Unproject back to LatLng
+        const newCenter = map.unproject(newCenterPoint, targetZoom);
+
+        map.flyTo(newCenter, targetZoom, {
+            duration: 1.0
+        });
+    };
+
+    return (
+        <Marker
+            key={vehicle.id}
+            position={[vehicle.latitude, vehicle.longitude]}
+            icon={createCustomIcon(vehicle.status)}
+            eventHandlers={{
+                click: handleMarkerClick,
+            }}
+        >
+            <Popup className="custom-popup">
+                <div className="max-w-50 p-2">
+                    <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+                        <h3 className="font-bold text-gray-900">{vehicle.name}</h3>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                            vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                            vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
+                            'bg-red-100 text-red-700'
+                        }`}>
+                            {vehicle.status}
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 p-2 rounded-lg flex flex-col items-center text-center">
+                            <Gauge className="h-5 w-5 text-purple-500 mb-1" />
+                            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Speed</span>
+                            <span className="font-bold text-gray-900">{vehicle.speed} km/h</span>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded-lg flex flex-col items-center text-center">
+                            <Fuel className="h-5 w-5 text-blue-500 mb-1" />
+                            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Fuel</span>
+                            <span className="font-bold text-gray-900">{vehicle.fuel_level}%</span>
+                        </div>
+                    </div>
+                </div>
+            </Popup>
+        </Marker>
+    );
 };
 
 export const DemoPage = () => {
@@ -65,7 +170,7 @@ export const DemoPage = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col">
             <Navbar />
 
-            <main className="grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex flex-col">
+            <main className="grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full flex flex-col">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -113,39 +218,7 @@ export const DemoPage = () => {
                         <MapController />
                         
                         {dummyVehicles.map((vehicle) => (
-                            <Marker
-                                key={vehicle.id}
-                                position={[vehicle.latitude, vehicle.longitude]}
-                                icon={createCustomIcon(vehicle.status)}
-                            >
-                                <Popup className="custom-popup">
-                                    <div className="min-w-[200px] p-2">
-                                        <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
-                                            <h3 className="font-bold text-gray-900">{vehicle.name}</h3>
-                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                                                vehicle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                                vehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' :
-                                                'bg-red-100 text-red-700'
-                                            }`}>
-                                                {vehicle.status}
-                                            </span>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="bg-gray-50 p-2 rounded-lg flex flex-col items-center text-center">
-                                                <Gauge className="h-5 w-5 text-purple-500 mb-1" />
-                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Speed</span>
-                                                <span className="font-bold text-gray-900">{vehicle.speed} km/h</span>
-                                            </div>
-                                            <div className="bg-gray-50 p-2 rounded-lg flex flex-col items-center text-center">
-                                                <Fuel className="h-5 w-5 text-blue-500 mb-1" />
-                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Fuel</span>
-                                                <span className="font-bold text-gray-900">{vehicle.fuel_level}%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Popup>
-                            </Marker>
+                            <VehicleMarker key={vehicle.id} vehicle={vehicle} />
                         ))}
                     </MapContainer>
                 </motion.div>
