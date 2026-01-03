@@ -33,11 +33,16 @@ app.use("/api/users", userRoutes);
 
 // Health check endpoint
 app.get("/", (req, res) => {
+  // Dynamically provide API documentation link
+  const protocol = req.protocol;
+  const host = req.get('host');
+  const fullUrl = `${protocol}://${host}`;
+
   res.json({
     success: true,
     message: "Vehicle Tracker API is running",
     version: "1.0.0",
-    documentation: `http://localhost:${process.env.PORT || 5000}/api-docs`,
+    documentation: `${fullUrl}/api-docs`,
   });
 });
 
@@ -81,8 +86,10 @@ const swaggerOptions = {
     ],
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 5000}`,
-        description: "Development server",
+        url: process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : `http://localhost:${process.env.PORT || 5000}`,
+        description: process.env.VERCEL_URL ? "Production server" : "Development server",
       },
     ],
   },
@@ -118,7 +125,11 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+  });
+}
+
+export default app;

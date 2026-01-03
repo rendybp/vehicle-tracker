@@ -50,6 +50,7 @@
   "compilerOptions": {
     /* File Layout */
     "outDir": "./dist",
+    "rootDir": "./src",
 
     /* Environment Settings */
     "module": "commonjs", 
