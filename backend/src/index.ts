@@ -17,7 +17,6 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(helmet()); // Security headers
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:3000",
   credentials: true, // Allow cookies
@@ -93,7 +92,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./src/routes/*.ts"], // Path to the API docs
+  apis: ["./src/routes/*.ts", "./dist/routes/*.js", "./api/routes/*.js"], // Path to the API docs
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -103,6 +102,11 @@ const swaggerUiOptions = {
   // explorer: true,
   customCss: '.swagger-ui.topbar { display: none }',
   customSiteTitle: "Vehicle Tracker API Documentation",
+  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css",
+  customJs: [
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js",
+  ],
   swaggerOptions: {
     persistAuthorization: true, // Persist authorization data
     displayRequestDuration: true,
@@ -114,6 +118,8 @@ const swaggerUiOptions = {
 };
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
+app.use(helmet()); // Security headers
 
 // 404 handler
 app.use((req, res) => {
