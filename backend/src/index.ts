@@ -6,6 +6,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import path from "path";
 
 // Import route handlers
 import authRoutes from "./routes/authRoutes";
@@ -92,10 +93,18 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./src/routes/*.ts", "./dist/routes/*.js", "./api/routes/*.js"], // Path to the API docs
+  apis: [
+    path.resolve(__dirname, "../src/routes/*.ts"),
+    path.resolve(__dirname, "./routes/*.js"),
+  ], // Path to the API docs
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
+
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 // Swagger UI options
 const swaggerUiOptions = {
@@ -103,6 +112,10 @@ const swaggerUiOptions = {
   customCss: '.swagger-ui.topbar { display: none }',
   customSiteTitle: "Vehicle Tracker API Documentation",
   customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css",
+  customJs: [
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js",
+  ],
   swaggerOptions: {
     persistAuthorization: true, // Persist authorization data
     displayRequestDuration: true,
