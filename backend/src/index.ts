@@ -119,7 +119,9 @@ const swaggerUiOptions = {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
-app.use(helmet()); // Security headers
+app.use(helmet({
+    contentSecurityPolicy: false // Security policy is disabled to allow Swagger UI to function properly
+}));
 
 // 404 handler
 app.use((req, res) => {
