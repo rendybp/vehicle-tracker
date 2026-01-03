@@ -10,35 +10,36 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Vehicle {
-  id          Int      @id @default(autoincrement())
-  name        String
-  status      VehicleStatus @default(ACTIVE)
-  fuel_level  Float
+  id         Int           @id @default(autoincrement())
+  name       String
+  status     VehicleStatus @default(ACTIVE)
+  fuel_level Float
   odometer   Float
   latitude   Float
   longitude  Float
   speed      Float
-  updated_at   DateTime @default(now()) @updatedAt 
-  created_at   DateTime @default(now())
+  updated_at DateTime      @default(now()) @updatedAt
+  created_at DateTime      @default(now())
 
   @@map("vehicles")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  role      UserRole @default(USER)
-  is_active  Boolean  @default(true)
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  name          String?
+  password      String
+  role          UserRole @default(USER)
+  is_active     Boolean  @default(true)
   refresh_token String?
-  updated_at DateTime @default(now()) @updatedAt
-  created_at DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+  created_at    DateTime @default(now())
 
   @@map("users")
 }
@@ -53,4 +54,3 @@ enum VehicleStatus {
   INACTIVE
   MAINTENANCE
 }
-
