@@ -19,9 +19,39 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: (origin, callback) => {
+
+    // Allow requests with no origin (like mobile apps, postman or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Whitelist of allowed origins
+    const allowedOrigins = [
+      "http://localhost:5173", // Frontend Development
+      "http://localhost:3000", // Backup in case using another port
+      process.env.CLIENT_URL   // Frontend Production (from ENV Vercel)
+    ];
+
+    // Check if the origin is in the whitelist
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // --- ADDITIONAL OPTION ---
+    // To allow "Preview Deployment" (when you create a new branch) to still work,
+    // but STILL SAFE from strangers.
+    // We check if the URL contains YOUR PROJECT NAME.
+    // Replace 'vehicle-tracker' with your frontend project name later.
+    if (origin.includes("vehicle-tracker") && origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
+
+    // If not allowed, log and return error
+    console.log("Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true, // Allow cookies
 })); // Enable CORS
+
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser()); // Parse cookies
@@ -122,7 +152,7 @@ const swaggerUiOptions = {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 app.use(helmet({
-    contentSecurityPolicy: false // Security policy is disabled to allow Swagger UI to function properly
+  contentSecurityPolicy: false // Security policy is disabled to allow Swagger UI to function properly
 }));
 
 // 404 handler
