@@ -86,10 +86,8 @@ const swaggerOptions = {
     ],
     servers: [
       {
-        url: process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : `http://localhost:${process.env.PORT || 5000}`,
-        description: process.env.VERCEL_URL ? "Production server" : "Development server",
+        url: "/",
+        description: "Current server",
       },
     ],
   },
@@ -100,11 +98,6 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
-
-app.get("/swagger.json", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  res.send(swaggerSpec);
-});
 
 // Swagger UI options
 const swaggerUiOptions = {
