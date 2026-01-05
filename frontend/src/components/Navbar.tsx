@@ -38,7 +38,9 @@ export const Navbar = () => {
     }
 
     if (location.pathname === path) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
     }
   };
 
