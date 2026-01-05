@@ -32,6 +32,16 @@ export const Navbar = () => {
     }
   };
 
+  const handleLinkClick = (path: string, isMobile = false) => {
+    if (isMobile) {
+      setIsMobileMenuOpen(false);
+    }
+
+    if (location.pathname === path) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Product", path: "/product" },
@@ -44,7 +54,11 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-2">
+            <Link
+              to="/"
+              className="flex items-center gap-2"
+              onClick={() => handleLinkClick("/")}
+            >
               <MapPin className="h-8 w-8 text-brand-600" />
               <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-brand-600 to-brand-400">
                 Vehicle Tracker
@@ -58,11 +72,11 @@ export const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-brand-600 ${
-                  location.pathname === link.path
+                onClick={() => handleLinkClick(link.path)}
+                className={`text-sm font-medium transition-colors hover:text-brand-600 ${location.pathname === link.path
                     ? "text-brand-600 font-semibold"
                     : "text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
               >
                 {link.name}
               </Link>
@@ -84,9 +98,8 @@ export const Navbar = () => {
                     {user.name || user.email}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                      isDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -192,12 +205,11 @@ export const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors ${
-                    location.pathname === link.path
+                  onClick={() => handleLinkClick(link.path, true)}
+                  className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors ${location.pathname === link.path
                       ? "bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400"
                       : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                  }`}
+                    }`}
                 >
                   {link.name}
                 </Link>
