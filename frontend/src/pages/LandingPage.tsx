@@ -11,7 +11,7 @@ export const LandingPage = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="pt-24 sm:pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -28,13 +28,13 @@ export const LandingPage = () => {
             <div className="flex gap-4">
               <Link
                 to="/register"
-                className="px-8 py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/30 flex items-center gap-2"
+                className="px-8 py-3 bg-brand-600 text-white text-sm sm:text-base rounded-xl font-semibold hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/30 flex items-center gap-2"
               >
                 Start Tracking <TrendingUp className="h-4 w-4" />
               </Link>
               <a
                 href="#features"
-                className="px-8 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                className="px-8 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 text-sm sm:text-base dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
               >
                 Learn More
               </a>
@@ -133,7 +133,7 @@ export const LandingPage = () => {
                 <div className="flex justify-between items-center gap-4">
                   <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl flex-1">
                     <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg text-green-600">
-                      <Activity className="h-5 w-5" />
+                      <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Status</p>
@@ -142,7 +142,7 @@ export const LandingPage = () => {
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl flex-1">
                     <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600">
-                      <TrendingUp className="h-5 w-5" />
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Speed</p>
