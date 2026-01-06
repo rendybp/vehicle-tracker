@@ -28,13 +28,13 @@ export const LandingPage = () => {
             <div className="flex gap-4">
               <Link
                 to="/register"
-                className="px-8 py-3 bg-brand-600 text-white text-sm sm:text-base rounded-xl font-semibold hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/30 flex items-center gap-2"
+                className="px-7 py-3 bg-brand-600 text-white text-sm sm:text-base rounded-xl font-semibold hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/30 flex items-center gap-2"
               >
                 Start Tracking <TrendingUp className="h-4 w-4" />
               </Link>
               <a
                 href="#features"
-                className="px-8 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 text-sm sm:text-base dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                className="px-7 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 text-sm sm:text-base dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
               >
                 Learn More
               </a>
@@ -81,14 +81,12 @@ export const LandingPage = () => {
                     style={{
                       width: '50px',
                       height: '50px',
-                      // translate(-50%, -50%) penting agar TITIK TENGAH lingkaran ada di garis
                       x: "-50%",
                       y: "-50%",
                       left: 0,
                       top: 0
                     }}
                     animate={{
-                      // Koordinat ini sudah dihitung agar pas dengan lekukan Q (Quadratic Bezier)
                       left: ["-10%", "5%", "20%", "35%", "50%", "65%", "80%", "95%", "110%"],
                       top: ["75%", "55%", "41%", "37%", "44%", "57%", "63%", "66%", "65%"]
                     }}
