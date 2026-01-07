@@ -210,7 +210,7 @@ export const DashboardLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 md:ml-64 pt-20 md:pt-0 p-4 sm:p-6 lg:p-8 md:overflow-y-auto md:h-screen scroll-smooth">
+            <main className="flex-1 w-full md:ml-64 pt-20 md:pt-0 p-4 sm:p-6 lg:p-8 md:overflow-y-auto md:h-screen scroll-smooth">
                 <div className="max-w-7xl mx-auto">
                     <Outlet />
                 </div>
