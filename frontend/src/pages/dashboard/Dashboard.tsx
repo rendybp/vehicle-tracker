@@ -107,9 +107,9 @@ export const Dashboard = () => {
                     <table className="w-full text-left text-sm">
                         <thead className="border-b border-gray-100 dark:border-gray-800 text-gray-500">
                             <tr>
-                                <th className="pb-3 font-medium">Name</th>
-                                <th className="pb-3 font-medium">Status</th>
-                                <th className="pb-3 font-medium">Fuel</th>
+                                <th className="pb-3 pr-2 font-medium">Name</th>
+                                <th className="pb-3 pr-2 font-medium text-center">Status</th>
+                                <th className="pb-3 pr-2 font-medium">Fuel</th>
                                 <th className="pb-3 font-medium">Speed</th>
                             </tr>
                         </thead>
@@ -123,12 +123,12 @@ export const Dashboard = () => {
                                         onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                                         className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
                                     >
-                                        <td className="py-3 font-medium text-gray-900 dark:text-gray-100">{vehicle.name}</td>
-                                        <td className="py-3">
+                                        <td className="py-3 pr-2 font-medium text-gray-900 dark:text-gray-100 max-w-28 sm:max-w-none truncate">{vehicle.name}</td>
+                                        <td className="py-3 pr-2 text-center">
                                             <StatusBadge status={vehicle.status} />
                                         </td>
-                                        <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.fuel_level}%</td>
-                                        <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.speed} km/h</td>
+                                        <td className="py-3 pr-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{vehicle.fuel_level}%</td>
+                                        <td className="py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{vehicle.speed} km/h</td>
                                     </tr>
                                 ))}
                         </tbody>
@@ -196,17 +196,34 @@ export const StatsCard = ({
 };
 
 export const StatusBadge = ({ status }: { status: string }) => {
-    const styles = {
+    const textStyles = {
         ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800',
         INACTIVE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
         MAINTENANCE: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800',
     };
+    const dotStyles = {
+        ACTIVE: 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]',
+        INACTIVE: 'bg-red-500',
+        MAINTENANCE: 'bg-orange-500',
+    };
+
+    const statusKey = status as keyof typeof textStyles;
+
     return (
-        <span className={cn(
-            "px-2.5 py-0.5 rounded-full text-xs font-medium border",
-            styles[status as keyof typeof styles] || styles.INACTIVE
-        )}>
-            {status}
-        </span>
+        <div className='flex items-center justify-center'>
+            <div 
+                title={status}
+                className={cn(
+                    "md:hidden w-3 h-3 rounded-full shrink-0",
+                    dotStyles[statusKey] || dotStyles.INACTIVE
+                )}
+            />
+            <span className={cn(
+                "hidden md:inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border",
+                textStyles[statusKey] || textStyles.INACTIVE
+            )}>
+                {status}
+            </span>
+        </div>
     );
 };
