@@ -118,7 +118,7 @@ export const VehicleList = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h1 className="mt-6 sm:mt-0 text-2xl font-bold text-gray-900 dark:text-gray-100">Vehicles</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vehicles</h1>
                 {user?.role === 'ADMIN' && (
                     <Link
                         to="/vehicles/new"
