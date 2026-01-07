@@ -253,7 +253,7 @@ export const VehicleList = () => {
             {isLoading ? (
                 <div className="text-center py-12">Loading vehicles...</div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {filteredVehicles.map(vehicle => (
                         <Link
                             to={`/vehicles/${vehicle.id}`}
@@ -261,7 +261,7 @@ export const VehicleList = () => {
                             className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10 transition-all group"
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className="font-semibold text-lg text-gray-900 dark:text-gray-100">{vehicle.name}</div>
+                                <div className="font-semibold text-gray-900 dark:text-gray-100 pr-1">{vehicle.name}</div>
                                 <StatusBadge status={vehicle.status} />
                             </div>
 
