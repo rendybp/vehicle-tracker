@@ -262,7 +262,7 @@ export const VehicleList = () => {
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="font-semibold text-gray-900 dark:text-gray-100 pr-1">{vehicle.name}</div>
-                                <StatusBadge status={vehicle.status} />
+                                <StatusBadge status={vehicle.status} variant='full' />
                             </div>
 
                             <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">

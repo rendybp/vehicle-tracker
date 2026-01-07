@@ -195,7 +195,12 @@ export const StatsCard = ({
     );
 };
 
-export const StatusBadge = ({ status }: { status: string }) => {
+interface StatusBadgeProps {
+    status: string;
+    variant?: 'responsive' | 'full';
+}
+
+export const StatusBadge = ({ status, variant = 'responsive' }: StatusBadgeProps) => {
     const textStyles = {
         ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800',
         INACTIVE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
@@ -214,12 +219,14 @@ export const StatusBadge = ({ status }: { status: string }) => {
             <div 
                 title={status}
                 className={cn(
-                    "md:hidden w-3 h-3 rounded-full shrink-0",
+                    "w-3 h-3 rounded-full shrink-0",
+                    variant === 'full' ? 'hidden' : 'md:hidden', 
                     dotStyles[statusKey] || dotStyles.INACTIVE
                 )}
             />
             <span className={cn(
-                "hidden md:inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border",
+                "px-2.5 py-0.5 rounded-full text-xs font-medium border",
+                variant === 'full' ? 'inline-flex' : 'hidden md:inline-flex',
                 textStyles[statusKey] || textStyles.INACTIVE
             )}>
                 {status}
