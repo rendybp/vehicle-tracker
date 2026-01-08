@@ -51,7 +51,7 @@ export const Dashboard = () => {
 
     return (
         <div className="space-y-6">
-            <h1 className="mt-6 sm:mt-0 text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard Overview</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard Overview</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
@@ -107,9 +107,9 @@ export const Dashboard = () => {
                     <table className="w-full text-left text-sm">
                         <thead className="border-b border-gray-100 dark:border-gray-800 text-gray-500">
                             <tr>
-                                <th className="pb-3 font-medium">Name</th>
-                                <th className="pb-3 font-medium">Status</th>
-                                <th className="pb-3 font-medium">Fuel</th>
+                                <th className="pb-3 pr-2 font-medium">Name</th>
+                                <th className="pb-3 pr-2 font-medium text-center">Status</th>
+                                <th className="pb-3 pr-2 font-medium">Fuel</th>
                                 <th className="pb-3 font-medium">Speed</th>
                             </tr>
                         </thead>
@@ -123,12 +123,12 @@ export const Dashboard = () => {
                                         onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                                         className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
                                     >
-                                        <td className="py-3 font-medium text-gray-900 dark:text-gray-100">{vehicle.name}</td>
-                                        <td className="py-3">
+                                        <td className="py-3 pr-2 font-medium text-gray-900 dark:text-gray-100 max-w-28 sm:max-w-none truncate">{vehicle.name}</td>
+                                        <td className="py-3 pr-2 text-center">
                                             <StatusBadge status={vehicle.status} />
                                         </td>
-                                        <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.fuel_level}%</td>
-                                        <td className="py-3 text-gray-600 dark:text-gray-400">{vehicle.speed} km/h</td>
+                                        <td className="py-3 pr-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{vehicle.fuel_level}%</td>
+                                        <td className="py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{vehicle.speed} km/h</td>
                                     </tr>
                                 ))}
                         </tbody>
@@ -178,10 +178,10 @@ export const StatsCard = ({
                         e.stopPropagation();
                         onToggleVisibility(e);
                     }}
-                    className="absolute top-3 right-3 p-3 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer"
+                    className="absolute top-3 right-3 p-3 lg:p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer"
                     title={isVisible ? "Hide from map" : "Show on map"}
                 >
-                    <EyeIcon size={30} />
+                    <EyeIcon className="w-7 h-7 lg:w-5 lg:h-5" />
                 </button>
             )}
             <div className={cn("p-3 rounded-lg", className)}>
@@ -195,18 +195,42 @@ export const StatsCard = ({
     );
 };
 
-export const StatusBadge = ({ status }: { status: string }) => {
-    const styles = {
+interface StatusBadgeProps {
+    status: string;
+    variant?: 'responsive' | 'full';
+}
+
+export const StatusBadge = ({ status, variant = 'responsive' }: StatusBadgeProps) => {
+    const textStyles = {
         ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800',
         INACTIVE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
         MAINTENANCE: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800',
     };
+    const dotStyles = {
+        ACTIVE: 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]',
+        INACTIVE: 'bg-red-500',
+        MAINTENANCE: 'bg-orange-500',
+    };
+
+    const statusKey = status as keyof typeof textStyles;
+
     return (
-        <span className={cn(
-            "px-2.5 py-0.5 rounded-full text-xs font-medium border",
-            styles[status as keyof typeof styles] || styles.INACTIVE
-        )}>
-            {status}
-        </span>
+        <div className='flex items-center justify-center'>
+            <div 
+                title={status}
+                className={cn(
+                    "w-3 h-3 rounded-full shrink-0",
+                    variant === 'full' ? 'hidden' : 'md:hidden', 
+                    dotStyles[statusKey] || dotStyles.INACTIVE
+                )}
+            />
+            <span className={cn(
+                "px-2.5 py-0.5 rounded-full text-xs font-medium border",
+                variant === 'full' ? 'inline-flex' : 'hidden md:inline-flex',
+                textStyles[statusKey] || textStyles.INACTIVE
+            )}>
+                {status}
+            </span>
+        </div>
     );
 };

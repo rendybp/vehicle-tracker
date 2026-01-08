@@ -2,6 +2,15 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../config/database";
+import {
+  REFRESH_TOKEN_COOKIE_OPTIONS,
+  PASSWORD_POLICY_MESSAGE,
+  isValidEmail,
+  isValidPassword,
+  hashPassword,
+  sanitizeError,
+  ProfileUpdateData,
+} from "../utils/constants";
 
 // Generate access token (short-lived)
 const generateAccessToken = (userId: number, email: string, role: string) => {
@@ -44,14 +53,19 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    // Password policy: Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
-    const passwordPolicyRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!passwordPolicyRegex.test(password)) {
+    // Email format validation
+    if (!isValidEmail(email)) {
       return res.status(400).json({
         success: false,
-        message:
-          "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
+        message: "Invalid email format",
+      });
+    }
+
+    // Password policy validation
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: PASSWORD_POLICY_MESSAGE,
       });
     }
 
@@ -68,7 +82,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
 
     // Create user
     const user = await prisma.user.create({
@@ -92,12 +106,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     // Set refresh token as HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure in production
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("refreshToken", refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
 
     res.status(201).json({
       success: true,
@@ -116,7 +125,7 @@ export const register = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error registering user",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -175,12 +184,7 @@ export const login = async (req: Request, res: Response) => {
     });
 
     // Set refresh token as HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("refreshToken", refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
 
     res.json({
       success: true,
@@ -199,7 +203,7 @@ export const login = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error logging in",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -274,7 +278,7 @@ export const refresh = async (req: Request, res: Response) => {
     res.status(403).json({
       success: false,
       message: "Invalid refresh token",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -297,11 +301,12 @@ export const logout = async (req: Request, res: Response) => {
       data: { refresh_token: null },
     });
 
-    // Clear cookie
+    // Clear cookie with same options (required for proper clearing)
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: "none",
+      path: "/",
     });
 
     res.json({
@@ -312,7 +317,7 @@ export const logout = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error logging out",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -355,7 +360,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error fetching user",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -373,27 +378,31 @@ export const updateProfile = async (req: Request, res: Response) => {
     const { email, name, password } = req.body;
     const userId = req.user.id;
 
-    // Build update data
-    const updateData: any = {};
+    // Build update data with proper type
+    const updateData: ProfileUpdateData = {};
     if (name !== undefined) updateData.name = name;
 
     // Handle password update
     if (password) {
-      // Password policy regex (same as register)
-      const passwordPolicyRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-      if (!passwordPolicyRegex.test(password)) {
+      if (!isValidPassword(password)) {
         return res.status(400).json({
           success: false,
-          message:
-            "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
+          message: PASSWORD_POLICY_MESSAGE,
         });
       }
-      updateData.password = await bcrypt.hash(password, 10);
+      updateData.password = await hashPassword(password);
     }
 
     // Handle email update
     if (email) {
+      // Validate email format
+      if (!isValidEmail(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+
       const existingUser = await prisma.user.findUnique({
         where: { email },
       });
@@ -437,7 +446,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error updating profile",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../config/database";
+import { sanitizeError } from "../utils/constants";
 
 // Get all vehicles
 export const getAllVehicles = async (req: Request, res: Response) => {
@@ -17,7 +18,7 @@ export const getAllVehicles = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error fetching vehicles",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -45,7 +46,7 @@ export const getVehicleById = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error fetching vehicle",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -53,14 +54,22 @@ export const getVehicleById = async (req: Request, res: Response) => {
 // Create new vehicle
 export const createVehicle = async (req: Request, res: Response) => {
   try {
-    const { name, fuel_level, odometer, latitude, longitude, speed, status } = req.body;
+    const { name, fuel_level, odometer, latitude, longitude, speed, status } =
+      req.body;
 
     // Basic validation
-    if (!name || fuel_level === undefined || odometer === undefined || 
-        latitude === undefined || longitude === undefined || speed === undefined) {
+    if (
+      !name ||
+      fuel_level === undefined ||
+      odometer === undefined ||
+      latitude === undefined ||
+      longitude === undefined ||
+      speed === undefined
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: name, fuel_level, odometer, latitude, longitude, speed",
+        message:
+          "Missing required fields: name, fuel_level, odometer, latitude, longitude, speed",
       });
     }
 
@@ -85,7 +94,7 @@ export const createVehicle = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error creating vehicle",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -94,7 +103,8 @@ export const createVehicle = async (req: Request, res: Response) => {
 export const updateVehicle = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, fuel_level, odometer, latitude, longitude, speed, status } = req.body;
+    const { name, fuel_level, odometer, latitude, longitude, speed, status } =
+      req.body;
 
     // Check if vehicle exists
     const existingVehicle = await prisma.vehicle.findUnique({
@@ -130,7 +140,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error updating vehicle",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -164,7 +174,7 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error deleting vehicle",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };

@@ -18,39 +18,44 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: (origin, callback) => {
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, postman or curl requests)
+      if (!origin) return callback(null, true);
 
-    // Allow requests with no origin (like mobile apps, postman or curl requests)
-    if (!origin) return callback(null, true);
+      // Whitelist of allowed origins
+      const allowedOrigins = [
+        "http://localhost:5173", // Frontend Development
+        "http://localhost:3000", // Backup in case using another port
+        "http://localhost:5000", // Backend Development - Swagger UI
+        process.env.CLIENT_URL, // Frontend Production (from ENV Vercel)
+      ];
 
-    // Whitelist of allowed origins
-    const allowedOrigins = [
-      "http://localhost:5173", // Frontend Development
-      "http://localhost:3000", // Backup in case using another port
-      process.env.CLIENT_URL   // Frontend Production (from ENV Vercel)
-    ];
+      // Check if the origin is in the whitelist
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-    // Check if the origin is in the whitelist
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+      // --- ADDITIONAL OPTION ---
+      // To allow "Preview Deployment" (when you create a new branch) to still work,
+      // but STILL SAFE from strangers.
+      // We check if the URL contains YOUR PROJECT NAME.
+      // Replace 'vehicle-tracker' with your frontend project name later.
+      if (
+        origin.includes("vehicle-tracker") &&
+        origin.endsWith(".vercel.app")
+      ) {
+        return callback(null, true);
+      }
 
-    // --- ADDITIONAL OPTION ---
-    // To allow "Preview Deployment" (when you create a new branch) to still work,
-    // but STILL SAFE from strangers.
-    // We check if the URL contains YOUR PROJECT NAME.
-    // Replace 'vehicle-tracker' with your frontend project name later.
-    if (origin.includes("vehicle-tracker") && origin.endsWith(".vercel.app")) {
-      return callback(null, true);
-    }
-
-    // If not allowed, log and return error
-    console.log("Blocked by CORS:", origin);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true, // Allow cookies
-})); // Enable CORS
+      // If not allowed, log and return error
+      console.log("Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true, // Allow cookies
+  })
+); // Enable CORS
 
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -65,7 +70,7 @@ app.use("/api/users", userRoutes);
 app.get("/", (req, res) => {
   // Dynamically provide API documentation link
   const protocol = req.protocol;
-  const host = req.get('host');
+  const host = req.get("host");
   const fullUrl = `${protocol}://${host}`;
 
   res.json({
@@ -132,9 +137,10 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 // Swagger UI options
 const swaggerUiOptions = {
   // explorer: true,
-  customCss: '.swagger-ui.topbar { display: none }',
+  customCss: ".swagger-ui.topbar { display: none }",
   customSiteTitle: "Vehicle Tracker API Documentation",
-  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css",
+  customCssUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css",
   customJs: [
     "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
     "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js",
@@ -149,11 +155,17 @@ const swaggerUiOptions = {
   },
 };
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, swaggerUiOptions)
+);
 
-app.use(helmet({
-  contentSecurityPolicy: false // Security policy is disabled to allow Swagger UI to function properly
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Security policy is disabled to allow Swagger UI to function properly
+  })
+);
 
 // 404 handler
 app.use((req, res) => {
@@ -165,10 +177,12 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+    console.log(
+      `API Documentation available at http://localhost:${PORT}/api-docs`
+    );
   });
 }
 

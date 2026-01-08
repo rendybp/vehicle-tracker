@@ -38,6 +38,19 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
         }
     });
 
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     // Reset form when modal opens or initialData changes
     useEffect(() => {
         if (isOpen) {
@@ -85,7 +98,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-4 overflow-y-auto">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -98,7 +111,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 z-10"
+                        className="relative w-full max-w-lg max-h-[95vh] mt-20 md:mt-0 bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-y-auto border border-gray-100 dark:border-gray-800 z-10"
                     >
                         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">

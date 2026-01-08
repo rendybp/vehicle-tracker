@@ -66,7 +66,7 @@ export const VehicleDetail = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{vehicle.name}</h1>
                     <div className="flex items-center gap-3">
-                        <StatusBadge status={vehicle.status} />
+                        <StatusBadge status={vehicle.status} variant='full' />
                         <span className="text-sm text-gray-500">ID: #{vehicle.id}</span>
                     </div>
                 </div>

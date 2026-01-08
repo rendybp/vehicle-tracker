@@ -118,7 +118,7 @@ export const VehicleList = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h1 className="mt-6 sm:mt-0 text-2xl font-bold text-gray-900 dark:text-gray-100">Vehicles</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vehicles</h1>
                 {user?.role === 'ADMIN' && (
                     <Link
                         to="/vehicles/new"
@@ -253,7 +253,7 @@ export const VehicleList = () => {
             {isLoading ? (
                 <div className="text-center py-12">Loading vehicles...</div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {filteredVehicles.map(vehicle => (
                         <Link
                             to={`/vehicles/${vehicle.id}`}
@@ -261,8 +261,8 @@ export const VehicleList = () => {
                             className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10 transition-all group"
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className="font-semibold text-lg text-gray-900 dark:text-gray-100">{vehicle.name}</div>
-                                <StatusBadge status={vehicle.status} />
+                                <div className="font-semibold text-gray-900 dark:text-gray-100 pr-1">{vehicle.name}</div>
+                                <StatusBadge status={vehicle.status} variant='full' />
                             </div>
 
                             <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">

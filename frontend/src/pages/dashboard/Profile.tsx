@@ -40,15 +40,15 @@ export const Profile = () => {
                 <div className="bg-linear-to-r from-brand-600 to-brand-400 h-32 relative">
                 </div>
 
-                <div className="px-8 pb-8">
-                    <div className="relative -mt-16 mb-6">
+                <div className="px-4 sm:px-8 pb-8">
+                    <div className="relative -mt-16 mb-6 flex justify-center sm:justify-start">
                         <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 flex items-center justify-center text-4xl font-bold text-gray-300 shadow-lg">
                             {user.name?.[0] || user.email[0]}
                         </div>
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex justify-between items-start">
+                        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 text-center sm:text-left">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user.name || 'Unnamed User'}</h2>
                                 <p className="text-gray-500">{user.email}</p>
