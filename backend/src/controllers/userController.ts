@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import prisma from "../config/database";
+import {
+  PASSWORD_POLICY_REGEX,
+  PASSWORD_POLICY_MESSAGE,
+  isValidEmail,
+  hashPassword,
+  sanitizeError,
+  UserUpdateData,
+} from "../utils/constants";
 
 // Get all users
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -28,7 +35,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error fetching users",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -66,7 +73,7 @@ export const getUserById = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error fetching user",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -84,10 +91,19 @@ export const createUser = async (req: Request, res: Response) => {
       });
     }
 
-    if (password.length < 8) {
+    // Email format validation
+    if (!isValidEmail(email)) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 8 characters",
+        message: "Invalid email format",
+      });
+    }
+
+    // Password policy validation
+    if (!PASSWORD_POLICY_REGEX.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: PASSWORD_POLICY_MESSAGE,
       });
     }
 
@@ -104,7 +120,7 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
 
     const user = await prisma.user.create({
       data: {
@@ -135,7 +151,7 @@ export const createUser = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error creating user",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -160,6 +176,14 @@ export const updateUser = async (req: Request, res: Response) => {
 
     // If email is being updated, check if it's already taken
     if (email && email !== existingUser.email) {
+      // Validate email format
+      if (!isValidEmail(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+
       const emailTaken = await prisma.user.findUnique({
         where: { email },
       });
@@ -172,17 +196,22 @@ export const updateUser = async (req: Request, res: Response) => {
       }
     }
 
-    // Prepare update data
-    const updateData: any = {
-      ...(email && { email }),
-      ...(name !== undefined && { name }),
-      ...(role && { role }),
-      ...(is_active !== undefined && { is_active }),
-    };
+    // Prepare update data with proper type
+    const updateData: UserUpdateData = {};
+    if (email) updateData.email = email;
+    if (name !== undefined) updateData.name = name;
+    if (role) updateData.role = role;
+    if (is_active !== undefined) updateData.is_active = is_active;
 
-    // Hash password if provided
+    // Hash password if provided (with validation)
     if (password) {
-      updateData.password = await bcrypt.hash(password, 10);
+      if (!PASSWORD_POLICY_REGEX.test(password)) {
+        return res.status(400).json({
+          success: false,
+          message: PASSWORD_POLICY_MESSAGE,
+        });
+      }
+      updateData.password = await hashPassword(password);
     }
 
     const user = await prisma.user.update({
@@ -209,7 +238,7 @@ export const updateUser = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error updating user",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
@@ -243,7 +272,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Error deleting user",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: sanitizeError(error),
     });
   }
 };
