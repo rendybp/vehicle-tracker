@@ -4,9 +4,9 @@ import jwt from "jsonwebtoken";
 import prisma from "../config/database";
 import {
   REFRESH_TOKEN_COOKIE_OPTIONS,
-  PASSWORD_POLICY_REGEX,
   PASSWORD_POLICY_MESSAGE,
   isValidEmail,
+  isValidPassword,
   hashPassword,
   sanitizeError,
   ProfileUpdateData,
@@ -62,7 +62,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Password policy validation
-    if (!PASSWORD_POLICY_REGEX.test(password)) {
+    if (!isValidPassword(password)) {
       return res.status(400).json({
         success: false,
         message: PASSWORD_POLICY_MESSAGE,
@@ -384,7 +384,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     // Handle password update
     if (password) {
-      if (!PASSWORD_POLICY_REGEX.test(password)) {
+      if (!isValidPassword(password)) {
         return res.status(400).json({
           success: false,
           message: PASSWORD_POLICY_MESSAGE,

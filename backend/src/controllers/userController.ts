@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import prisma from "../config/database";
 import {
-  PASSWORD_POLICY_REGEX,
   PASSWORD_POLICY_MESSAGE,
   isValidEmail,
+  isValidPassword,
   hashPassword,
   sanitizeError,
   UserUpdateData,
@@ -100,7 +100,7 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     // Password policy validation
-    if (!PASSWORD_POLICY_REGEX.test(password)) {
+    if (!isValidPassword(password)) {
       return res.status(400).json({
         success: false,
         message: PASSWORD_POLICY_MESSAGE,
@@ -205,7 +205,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
     // Hash password if provided (with validation)
     if (password) {
-      if (!PASSWORD_POLICY_REGEX.test(password)) {
+      if (!isValidPassword(password)) {
         return res.status(400).json({
           success: false,
           message: PASSWORD_POLICY_MESSAGE,
