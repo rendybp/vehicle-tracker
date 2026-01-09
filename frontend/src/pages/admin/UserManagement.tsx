@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { User as UserIcon, Shield, Mail, Calendar, Search, Plus, Filter, Edit2, Trash2, X } from 'lucide-react';
+import { User as UserIcon, Shield, Mail, Calendar, Search, Plus, Filter, Edit2, Trash2, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { userService } from '../../services/userService';
 import type { UserResponse, RegisterRequest } from '../../types';
@@ -26,6 +26,7 @@ export const UserManagement = () => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const loadUsers = async () => {
         try {
@@ -80,6 +81,7 @@ export const UserManagement = () => {
     const handleDeleteUser = async () => {
         if (!selectedUser) return;
         try {
+            setIsDeleting(true);
             await userService.delete(selectedUser.id);
             toast.success('User deleted successfully');
             await loadUsers();
@@ -88,6 +90,8 @@ export const UserManagement = () => {
         } catch (error) {
             console.error('Failed to delete user', error);
             toast.error('Failed to delete user');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -243,7 +247,12 @@ export const UserManagement = () => {
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={5} className="py-12 text-center text-gray-500">Loading users...</td>
+                                    <td colSpan={5} className="py-12">
+                                        <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
+                                            <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
+                                            <p className="text-gray-700 dark:text-gray-400">Loading users...</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             ) : filteredUsers.length === 0 ? (
                                 <tr>
@@ -342,6 +351,7 @@ export const UserManagement = () => {
                 isOpen={isDeleteOpen}
                 onClose={() => setIsDeleteOpen(false)}
                 onConfirm={handleDeleteUser}
+                isDeleting={isDeleting}
                 title={selectedUser ? "Delete User" : "Delete Item"}
                 message="Are you sure you want to delete this user? This action cannot be undone and they will lose all access."
                 itemName={selectedUser?.name || selectedUser?.email}

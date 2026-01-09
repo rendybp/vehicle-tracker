@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Activity, Wrench, AlertTriangle, Eye, EyeOff, type LucideIcon } from 'lucide-react';
+import { Car, Activity, Wrench, AlertTriangle, Eye, EyeOff, Loader2, type LucideIcon } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { cn } from '../../lib/utils';
@@ -46,7 +46,12 @@ export const Dashboard = () => {
     const filteredMapVehicles = vehicles.filter(v => !hiddenStatuses.includes(v.status));
 
     if (isLoading) {
-        return <div className="p-8 text-center">Loading dashboard...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
+                <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
+                <p className="text-gray-700 dark:text-gray-400">Loading dashboard...</p>
+            </div>
+        );
     }
 
     return (
@@ -216,11 +221,11 @@ export const StatusBadge = ({ status, variant = 'responsive' }: StatusBadgeProps
 
     return (
         <div className='flex items-center justify-center'>
-            <div 
+            <div
                 title={status}
                 className={cn(
                     "w-3 h-3 rounded-full shrink-0",
-                    variant === 'full' ? 'hidden' : 'md:hidden', 
+                    variant === 'full' ? 'hidden' : 'md:hidden',
                     dotStyles[statusKey] || dotStyles.INACTIVE
                 )}
             />

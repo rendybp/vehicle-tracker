@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Fuel, Gauge, SlidersHorizontal, Plus, X, Check, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Fuel, Gauge, SlidersHorizontal, Plus, X, Check, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { StatusBadge } from './Dashboard';
@@ -251,7 +251,10 @@ export const VehicleList = () => {
 
             {/* Grid */}
             {isLoading ? (
-                <div className="text-center py-12">Loading vehicles...</div>
+                <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
+                    <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
+                    <p className="text-gray-700 dark:text-gray-400">Loading vehicles...</p>
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {filteredVehicles.map(vehicle => (
