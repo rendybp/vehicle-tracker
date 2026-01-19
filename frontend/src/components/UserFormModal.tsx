@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Shield, User as UserIcon, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { X, Save, Shield, User as UserIcon, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import type { User } from '../types';
 import { registerSchema, editUserSchema } from '../lib/schemas';
 
@@ -45,7 +45,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
         } else {
             document.body.style.overflow = 'unset';
         }
-        
+
         return () => {
             document.body.style.overflow = 'unset';
         };
@@ -103,7 +103,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={isLoading ? undefined : onClose}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     />
 
@@ -117,7 +117,11 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                                 {isProfile ? 'Edit Profile' : (initialData ? 'Edit User' : 'Add New User')}
                             </h2>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                            <button
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer disabled:cursor-not-allowed"
+                            >
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
@@ -257,18 +261,25 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+                                    disabled={isLoading}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-lg shadow-brand-600/20 transition-all flex items-center gap-2 cursor-pointer"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg shadow-lg shadow-brand-600/20 transition-all hover:bg-brand-700 focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                                 >
-                                    {isLoading ? 'Saving...' : (
+                                    {isLoading ? (
                                         <>
-                                            <Save className="h-4 w-4" /> Save
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            <span>Saving...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="h-4 w-4" />
+                                            <span>Save</span>
                                         </>
                                     )}
                                 </button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,6 +19,10 @@ export const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -43,6 +47,36 @@ export const Navbar = () => {
       }, 100);
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isDropdownOpen &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+
+      if (
+        isMobileMenuOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileButtonRef.current &&
+        !mobileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isDropdownOpen || isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen, isMobileMenuOpen]);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -76,8 +110,8 @@ export const Navbar = () => {
                 to={link.path}
                 onClick={() => handleLinkClick(link.path)}
                 className={`text-sm font-medium transition-colors hover:text-brand-600 ${location.pathname === link.path
-                    ? "text-brand-600 font-semibold"
-                    : "text-gray-700 dark:text-gray-300"
+                  ? "text-brand-600 font-semibold"
+                  : "text-gray-700 dark:text-gray-300"
                   }`}
               >
                 {link.name}
@@ -87,7 +121,7 @@ export const Navbar = () => {
 
           <div className="flex items-center gap-4">
             {user ? (
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-2 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
@@ -108,56 +142,50 @@ export const Navbar = () => {
                 {/* Dropdown Menu */}
                 <AnimatePresence>
                   {isDropdownOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 origin-top-right"
+                    >
+                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
+                        <p className="text-xs text-gray-500 font-medium truncate">
+                          Signed in as
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {user.name || user.email}
+                        </p>
+                      </div>
+
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-brand-600 transition-colors"
                         onClick={() => setIsDropdownOpen(false)}
-                      ></div>
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 origin-top-right"
                       >
-                        <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                          <p className="text-xs text-gray-500 font-medium truncate">
-                            Signed in as
-                          </p>
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {user.name || user.email}
-                          </p>
-                        </div>
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Link>
 
-                        <Link
-                          to="/dashboard"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-brand-600 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-brand-600 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <User className="w-4 h-4" />
+                        Profile
+                      </Link>
+
+                      <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
                         >
-                          <LayoutDashboard className="w-4 h-4" />
-                          Dashboard
-                        </Link>
-
-                        <Link
-                          to="/profile"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-brand-600 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <User className="w-4 h-4" />
-                          Profile
-                        </Link>
-
-                        <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
-                          <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
-                          >
-                            <LogOut className="w-4 h-4" />
-                            Logout
-                          </button>
-                        </div>
-                      </motion.div>
-                    </>
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </div>
@@ -178,10 +206,10 @@ export const Navbar = () => {
               </div>
             )}
 
-            {/* Mobile menu button */}
             <button
+              ref={mobileButtonRef}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+              className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors cursor-pointer"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -197,6 +225,7 @@ export const Navbar = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
+            ref={mobileMenuRef}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -209,8 +238,8 @@ export const Navbar = () => {
                   to={link.path}
                   onClick={() => handleLinkClick(link.path, true)}
                   className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors ${location.pathname === link.path
-                      ? "bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400"
-                      : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                    ? "bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400"
+                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                     }`}
                 >
                   {link.name}

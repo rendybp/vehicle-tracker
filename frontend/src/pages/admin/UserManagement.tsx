@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { User as UserIcon, Shield, Mail, Calendar, Search, Plus, Filter, Edit2, Trash2, X } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { User as UserIcon, Shield, Mail, Calendar, Search, Plus, Filter, Edit2, Trash2, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { userService } from '../../services/userService';
 import type { UserResponse, RegisterRequest } from '../../types';
@@ -26,6 +26,9 @@ export const UserManagement = () => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const filterRef = useRef<HTMLDivElement>(null);
 
     const loadUsers = async () => {
         try {
@@ -43,6 +46,22 @@ export const UserManagement = () => {
     useEffect(() => {
         loadUsers();
     }, []);
+
+    // Close filter dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+                setIsFilterOpen(false);
+            }
+        };
+
+        if (isFilterOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isFilterOpen]);
 
     const handleSaveUser = async (data: RegisterRequest & { is_active: boolean | string }) => {
         setIsSaving(true);
@@ -80,6 +99,7 @@ export const UserManagement = () => {
     const handleDeleteUser = async () => {
         if (!selectedUser) return;
         try {
+            setIsDeleting(true);
             await userService.delete(selectedUser.id);
             toast.success('User deleted successfully');
             await loadUsers();
@@ -88,6 +108,8 @@ export const UserManagement = () => {
         } catch (error) {
             console.error('Failed to delete user', error);
             toast.error('Failed to delete user');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -131,7 +153,7 @@ export const UserManagement = () => {
             </div>
 
             {/* Filters Toolbar */}
-            <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+            <div className="flex gap-4 relative z-10">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
@@ -151,7 +173,7 @@ export const UserManagement = () => {
                     )}
                 </div>
 
-                <div className="flex gap-2 relative">
+                <div className="flex gap-2 relative" ref={filterRef}>
                     <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                         className={`px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors cursor-pointer ${isFilterOpen ? 'ring-2 ring-brand-500 border-transparent' : ''}`}
@@ -243,7 +265,12 @@ export const UserManagement = () => {
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={5} className="py-12 text-center text-gray-500">Loading users...</td>
+                                    <td colSpan={5} className="py-12">
+                                        <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
+                                            <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
+                                            <p className="text-gray-700 dark:text-gray-400">Loading users...</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             ) : filteredUsers.length === 0 ? (
                                 <tr>
@@ -342,6 +369,7 @@ export const UserManagement = () => {
                 isOpen={isDeleteOpen}
                 onClose={() => setIsDeleteOpen(false)}
                 onConfirm={handleDeleteUser}
+                isDeleting={isDeleting}
                 title={selectedUser ? "Delete User" : "Delete Item"}
                 message="Are you sure you want to delete this user? This action cannot be undone and they will lose all access."
                 itemName={selectedUser?.name || selectedUser?.email}

@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, Loader2, X } from 'lucide-react';
 import { useEffect } from 'react';
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    isDeleting?: boolean;
     title?: string;
     message?: string;
     itemName?: string;
@@ -17,6 +18,7 @@ export const DeleteConfirmationModal = ({
     isOpen,
     onClose,
     onConfirm,
+    isDeleting = false,
     title = "Delete Item",
     message = "Are you sure you want to delete this item? This action cannot be undone.",
     itemName,
@@ -44,7 +46,7 @@ export const DeleteConfirmationModal = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={!isDeleting ? onClose : undefined}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     />
 
@@ -63,7 +65,8 @@ export const DeleteConfirmationModal = ({
                             </div>
                             <button 
                                 onClick={onClose}
-                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer"
+                                disabled={isDeleting}
+                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -88,18 +91,26 @@ export const DeleteConfirmationModal = ({
                         <div className="p-6 pt-2 flex gap-3 justify-end bg-gray-50/50 dark:bg-gray-800/20">
                             <button
                                 onClick={onClose}
-                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow cursor-pointer"
+                                disabled={isDeleting}
+                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 {cancelText}
                             </button>
                             <button
                                 onClick={() => {
                                     onConfirm();
-                                    onClose(); // Optional: Close immediately, or let parent handle
                                 }}
-                                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-lg shadow-red-600/20 transition-all transform active:scale-95 cursor-pointer"
+                                disabled={isDeleting}
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-lg shadow-red-600/20 transition-all transform active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                             >
-                                {confirmText}
+                                {isDeleting ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>Deleting...</span>
+                                    </>
+                                ) : (
+                                    confirmText
+                                )}
                             </button>
                         </div>
                     </motion.div>

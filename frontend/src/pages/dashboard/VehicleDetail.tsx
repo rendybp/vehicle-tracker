@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Car, Fuel, Gauge, Calendar, Clock, Edit, Trash2, MapPin, Loader2 } from 'lucide-react';
+import { ArrowLeft, Car, Fuel, Gauge, Calendar, Clock, Edit, Trash2, MapPin, Loader2, TriangleAlert } from 'lucide-react';
 import { vehicleService } from '../../services/vehicleService';
 import type { Vehicle } from '../../types';
 import { StatusBadge } from './Dashboard';
@@ -17,6 +17,7 @@ export const VehicleDetail = () => {
     const [vehicle, setVehicle] = useState<Vehicle | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const { address, loading, error } = useReverseGeocoding(vehicle?.latitude, vehicle?.longitude);
 
@@ -41,17 +42,30 @@ export const VehicleDetail = () => {
     const handleConfirmDelete = async () => {
         if (!vehicle) return;
         try {
+            setIsDeleting(true);
             await vehicleService.delete(vehicle.id);
             toast.success('Vehicle deleted');
             navigate('/vehicles');
         } catch (error) {
             console.error('Failed to delete vehicle', error);
             toast.error('Failed to delete vehicle');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
-    if (isLoading) return <div className="p-8">Loading...</div>;
-    if (!vehicle) return <div className="p-8">Vehicle not found</div>;
+    if (isLoading) return (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
+            <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
+            <p className="text-gray-700 dark:text-gray-400">Loading vehicle...</p>
+        </div>
+    );
+    if (!vehicle) return (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
+            <TriangleAlert className="w-10 h-10 text-red-600" />
+            <p className="text-gray-700 dark:text-gray-400">Vehicle not found.</p>
+        </div>
+    );
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
@@ -197,6 +211,7 @@ export const VehicleDetail = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
+                isDeleting={isDeleting}
                 title="Delete Vehicle"
                 message="Are you sure you want to delete this vehicle?"
                 itemName={vehicle.name}
