@@ -103,7 +103,7 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={isLoading ? undefined : onClose}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     />
 
@@ -117,7 +117,11 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                                 {isProfile ? 'Edit Profile' : (initialData ? 'Edit User' : 'Add New User')}
                             </h2>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                            <button
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer disabled:cursor-not-allowed"
+                            >
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
@@ -257,7 +261,8 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+                                    disabled={isLoading}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
