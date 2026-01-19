@@ -59,13 +59,13 @@ export const VehicleDetail = () => {
             <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
             <p className="text-gray-700 dark:text-gray-400">Loading vehicle...</p>
         </div>
-    )
+    );
     if (!vehicle) return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-3">
             <TriangleAlert className="w-10 h-10 text-red-600" />
             <p className="text-gray-700 dark:text-gray-400">Vehicle not found.</p>
         </div>
-    )
+    );
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
