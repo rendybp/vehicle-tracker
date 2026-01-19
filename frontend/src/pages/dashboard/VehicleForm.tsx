@@ -73,7 +73,8 @@ export const VehicleForm = () => {
         <div className="max-w-2xl mx-auto">
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors mb-6 cursor-pointer"
+                disabled={isLoading}
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors mb-6 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
             >
                 <ArrowLeft className="h-4 w-4" /> Cancel
             </button>
