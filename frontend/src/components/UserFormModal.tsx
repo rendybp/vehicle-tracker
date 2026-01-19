@@ -278,7 +278,6 @@ export const UserFormModal = ({ isOpen, onClose, onSave, initialData, isLoading,
                                         </>
                                     ) : (
                                         <>
-
                                             <Save className="h-4 w-4" />
                                             <span>Save</span>
                                         </>
