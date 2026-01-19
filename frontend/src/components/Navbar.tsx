@@ -69,7 +69,9 @@ export const Navbar = () => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    if (isDropdownOpen || isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
