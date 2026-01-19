@@ -66,7 +66,7 @@ export const DeleteConfirmationModal = ({
                             <button 
                                 onClick={onClose}
                                 disabled={isDeleting}
-                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer"
+                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -92,7 +92,7 @@ export const DeleteConfirmationModal = ({
                             <button
                                 onClick={onClose}
                                 disabled={isDeleting}
-                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow cursor-pointer"
+                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 {cancelText}
                             </button>
